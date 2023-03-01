@@ -22,7 +22,7 @@ Run the following commands to intiate wallet recovery:
 
 ```
 git clone https://github.com/pentagonxyz/waymont-wallet-global-recovery-script
-cd waymont-global-recovery-script
+cd waymont-wallet-global-recovery-script
 node initiate-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here"
 ```
 
