@@ -16,12 +16,18 @@ On your computer, for each wallet address you would like to export:
 
 Identify the deployment nonce of the wallet. This can be found in the wallet's contract creation transaction input data on Etherscan: simply go the wallet contract on Etherscan, click on the transaction hash listed after "at txn" under "CONTRACT CREATOR" (inside the "More Info" card in the middle of the row of cards at the top of the page), go to the bottom of the page where it says "Input Data", click the "Decode Input Data" button, and you'll see the deployment nonce listed under the "Data" column in the row whose "Name" is `nonce`.
 
-Run the following commands:
+Run the following commands to intiate wallet recovery:
 
 ```
 git clone https://github.com/pentagonxyz/waymont-wallet-global-recovery-script
 cd waymont-global-recovery-script
-node index.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here" 0xEXAMPLETARGET1 0xEXAMPLEDATA1 0xEXAMPLETARGET2 0xEXAMPLEDATA2
+node initiate-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here"
+```
+
+After waiting for the 14-day timelock to pass, run the following commands to complete recovery of your wallet:
+
+```
+node execute-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here" 0xEXAMPLETARGET1 0xEXAMPLEDATA1 0xEXAMPLETARGET2 0xEXAMPLEDATA2
 ```
 
 - Replace `http://localhost:8545` with your Web3 provider's JSON-RPC API endpoint URL--for example: `https://mainnet.infura.io/v3/YOUR-API-KEY`.
