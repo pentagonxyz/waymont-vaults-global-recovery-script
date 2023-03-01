@@ -4,6 +4,8 @@ Recovery script for use in the event that Waymont's relay guardian (i.e., transa
 
 ## Instructions
 
+First, export your mnemonic seed phrase from your Waymont mobile signer app:
+
 1. Open the Waymont mobile app on your mobile app.
 2. Hit the settings button.
 3. Hit "Export Private Key" to export your HD (hierarchical deterministic) wallet root private key.
