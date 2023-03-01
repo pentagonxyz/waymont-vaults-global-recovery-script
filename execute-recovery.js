@@ -154,7 +154,8 @@ if (timelock > 0) {
   let queueTimestamp = await myWalletContract.disableRelayerWhitelistQueueTimestamp();
   assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
   assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated."
-  await myWalletContract.disableRelayerWhitelist();
+  let tx = await myWalletContract.disableRelayerWhitelist();
+  console.log("Submitted disableRelayerWhitelist with transaction hash:", tx.transactionHash);
 }
 
 let targets = [];
@@ -168,4 +169,4 @@ let feeData = ["1000000000000000000000000000000000000", "10000000000000000000000
 let dataHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256", "bytes4", "address[]", "bytes[]", "uint256[]", "uint256[4]"], [myProvider.network.chainId, myWalletContract.address, ++(await myWalletContract.nonce()), myWalletContract.interface.getSighash("functionCallMulti"), targets, data, values, feeData]));
 let signatures = [myChildSigningKey.signDigest(dataHash)];
 let tx = await wallet.functionCallMulti(signatures, targets, data, values, feeData);
-console.log("Submitted transaction:", tx.transactionHash);
+console.log("Submitted functionCallMulti with transaction hash:", tx.transactionHash);
