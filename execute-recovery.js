@@ -153,8 +153,12 @@ let timelock = await myWalletContract.relayerWhitelistTimelock();
 if (timelock > 0) {
   let queueTimestamp = await myWalletContract.disableRelayerWhitelistQueueTimestamp();
   assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
-  assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated."
-  let tx = await myWalletContract.disableRelayerWhitelist();
+  assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated.");
+
+  let dataHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256", "bytes4"], [myProvider.network.chainId, myWalletContract.address, ++(await myWalletContract.nonce()), myWalletContract.interface.getSighash("disableRelayerWhitelist")]));
+  let signatures = [myChildSigningKey.signDigest(dataHash)];
+    
+  let tx = await myWalletContract.disableRelayerWhitelist(signatures);
   console.log("Submitted disableRelayerWhitelist with transaction hash:", tx.transactionHash);
 }
 
@@ -168,5 +172,6 @@ for (var i = 9; i < process.argv.length; i += 3) values.push(process.argv[i]);
 let feeData = ["1000000000000000000000000000000000000", "1000000000000000000000000000000000000", "1000000000000000000000000000000000000", "0"]; // Set first 3 thresholds to a very high value (1e36) to avoid crossing them and set paymaster incentive to 0 as we are now the paymaster
 let dataHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256", "bytes4", "address[]", "bytes[]", "uint256[]", "uint256[4]"], [myProvider.network.chainId, myWalletContract.address, ++(await myWalletContract.nonce()), myWalletContract.interface.getSighash("functionCallMulti"), targets, data, values, feeData]));
 let signatures = [myChildSigningKey.signDigest(dataHash)];
+
 let tx = await wallet.functionCallMulti(signatures, targets, data, values, feeData);
 console.log("Submitted functionCallMulti with transaction hash:", tx.transactionHash);
