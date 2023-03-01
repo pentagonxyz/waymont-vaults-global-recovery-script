@@ -27,7 +27,7 @@ node initiate-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE 
 After waiting for the 14-day timelock to pass, run the following commands to complete recovery of your wallet:
 
 ```
-node execute-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here" 0xEXAMPLETARGET1 0xEXAMPLEDATA1 0xEXAMPLETARGET2 0xEXAMPLEDATA2
+node execute-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURWALLETCONTRACTDEPLOYMENTNONCE 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here" 0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA EXAMPLECALL1VALUE 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA EXAMPLECALL2VALUE
 ```
 
 - Replace `http://localhost:8545` with your Web3 provider's JSON-RPC API endpoint URL--for example: `https://mainnet.infura.io/v3/YOUR-API-KEY`.
@@ -35,4 +35,5 @@ node execute-recovery.js http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE Y
 - Replace `YOURWALLETCONTRACTDEPLOYMENTNONCE` with the deployment nonce integer you found on Etherscan in step 8B.
 - Replace `0xFUNDEDPRIVATEKEYFORGAS` with an Ethereum account's private key with enough Ethereum for the gas costs necessary to send the transactions you would like to send.
 - Replace `type your mnemonic phrase here` with your mnemonic seed phrase.
-- Replace `0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA` with the following: for each transaction you want to send, enter the target address and data to be sent to the target (if you are simply trying to send ETH to a target without any contract function call data, just use "0x" for the data parameter.)
+- Replace `0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA EXAMPLECALL1VALUE 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA EXAMPLECALL2VALUE` with the following values, all separated by spaces: for each transaction you want to send, enter the target address, data to be sent to the target, and ETH value to be sent to the target.
+    - If you are simply trying to send ETH to a target without any contract function call data, just use "0x" for the data parameter.
