@@ -27,7 +27,7 @@ const WALLET_CONTRACT_ABI = [
                 "type": "tuple[]"
             }
         ],
-        "name": "disableRelayerWhitelist",
+        "name": "queueDisableRelayerWhitelist",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
