@@ -21,7 +21,7 @@ First, export your 12-word mnemonic seed phrase (root private key) from your Way
 1. [Download and install Node.js](https://nodejs.org/en/download/) or [install Node.js via a package manager](https://nodejs.org/en/download/package-manager/) (we prefer [`nvm`--Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script)).
 2. Before running the scripts, run the following command to disable bash history so your keys are not saved to disk: `set +o history`
 
-### For Each Wallet Address
+### Recover Each Wallet Address
 
 On your computer, for each wallet address you would like to export:
 
