@@ -60,6 +60,22 @@ const WALLET_CONTRACT_ABI = [
     },
 ];
 
+const WALLET_FACTORY_CONTRACT_ABI = [
+    {
+        "inputs": [],
+        "name": "relayGuardian",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
+
 assert(process.argv.length == 7, "Invalid number of arguments supplied--you should have exactly 5 arguments.");
 assert(process.argv[2].length > 0, "The JSON-RPC provider URL you entered is not valid.");
 assert(process.argv[3].length === 42 && process.argv[3].substring(0, 2) === "0x", "The wallet contract address you entered is not valid.");
@@ -75,6 +91,11 @@ const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
 const myChild = node.derivePath(hdPath + `/${process.argv[4]}`);
 const myChildWallet = new Wallet(child.privateKey);
 const myChildSigningKey = childWallet._signingKey();
+
+let walletFactoryAddress = await myWalletContract.walletFactory();
+let walletFactoryContract = new ethers.Contract(walletFactoryAddress, WALLET_FACTORY_CONTRACT_ABI);
+let relayGuardian = await walletFactoryContract.relayGuardian();
+assert(relayGuardian !== "0x0000000000000000000000000000000000000000", "Relay guardian has already been disabled by Waymont. Use the recovery execution script instead.");
 
 let timelock = await myWalletContract.relayerWhitelistTimelock();
 assert(timelock > 0, "Timelock has already passed. Use the recovery execution script instead.");
