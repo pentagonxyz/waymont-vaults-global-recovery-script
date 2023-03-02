@@ -125,6 +125,35 @@ const WALLET_CONTRACT_ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+	{
+		"inputs": [],
+		"name": "walletFactory",
+		"outputs": [
+			{
+				"internalType": "contract WalletFactory",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+const WALLET_FACTORY_CONTRACT_ABI = [
+    {
+        "inputs": [],
+        "name": "relayGuardian",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ];
 
@@ -148,18 +177,24 @@ const myChild = node.derivePath(hdPath + `/${process.argv[4]}`);
 const myChildWallet = new Wallet(child.privateKey);
 const myChildSigningKey = childWallet._signingKey();
 
-let timelock = await myWalletContract.relayerWhitelistTimelock();
+let walletFactoryAddress = await myWalletContract.walletFactory();
+let walletFactoryContract = new ethers.Contract(walletFactoryAddress, WALLET_FACTORY_CONTRACT_ABI);
+let relayGuardian = await walletFactoryContract.relayGuardian();
 
-if (timelock > 0) {
-  let queueTimestamp = await myWalletContract.disableRelayerWhitelistQueueTimestamp();
-  assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
-  assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated.");
+if (relayGuardian !== "0x0000000000000000000000000000000000000000") {
+    let timelock = await myWalletContract.relayerWhitelistTimelock();
 
-  let dataHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256", "bytes4"], [myProvider.network.chainId, myWalletContract.address, ++(await myWalletContract.nonce()), myWalletContract.interface.getSighash("disableRelayerWhitelist")]));
-  let signatures = [myChildSigningKey.signDigest(dataHash)];
-    
-  let tx = await myWalletContract.disableRelayerWhitelist(signatures);
-  console.log("Submitted disableRelayerWhitelist with transaction hash:", tx.transactionHash);
+    if (timelock > 0) {
+        let queueTimestamp = await myWalletContract.disableRelayerWhitelistQueueTimestamp();
+        assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
+        assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated.");
+
+        let dataHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256", "bytes4"], [myProvider.network.chainId, myWalletContract.address, ++(await myWalletContract.nonce()), myWalletContract.interface.getSighash("disableRelayerWhitelist")]));
+        let signatures = [myChildSigningKey.signDigest(dataHash)];
+
+        let tx = await myWalletContract.disableRelayerWhitelist(signatures);
+        console.log("Submitted disableRelayerWhitelist with transaction hash:", tx.transactionHash);
+    }
 }
 
 let targets = [];
