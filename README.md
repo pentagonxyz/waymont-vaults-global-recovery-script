@@ -29,7 +29,7 @@ On your computer, for each wallet address you would like to export:
 
 Identify the deployment nonce of the wallet. This can be found in the wallet's contract creation transaction input data on Etherscan: simply go the wallet contract on Etherscan, click on the transaction hash listed after "at txn" under "CONTRACT CREATOR" (inside the "More Info" card in the middle of the row of cards at the top of the page), go to the bottom of the page where it says "Input Data", click the "Decode Input Data" button, and you'll see the deployment nonce listed under the "Data" column in the row whose "Name" is `nonce`.
 
-#### Initiate Wallet Recovery
+#### Initiate Wallet Recovery (if necessary)
 
 Note that if Waymont has globally disabled the relay guardian/transaction policy engine on all wallets (as a result of the business shutting down, for example), you do not need to run the wallet recovery initiation script and wait for the 14-day timelock to pass--you can go straight to running the execution script.
 
