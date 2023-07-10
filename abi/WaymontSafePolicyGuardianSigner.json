@@ -1,0 +1,538 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_policyGuardianManager",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            }
+        ],
+        "name": "DisablePolicyGuardianQueued",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            }
+        ],
+        "name": "DisablePolicyGuardianUnqueued",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "_pendingPolicyGuardianManager",
+                "type": "address"
+            }
+        ],
+        "name": "PendingPolicyGuardianManagerChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "_policyGuardian",
+                "type": "address"
+            }
+        ],
+        "name": "PolicyGuardianChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "permanently",
+                "type": "bool"
+            }
+        ],
+        "name": "PolicyGuardianDisabledGlobally",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "withoutPolicyGuardian",
+                "type": "bool"
+            }
+        ],
+        "name": "PolicyGuardianDisabledOnSafe",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "_policyGuardianManager",
+                "type": "address"
+            }
+        ],
+        "name": "PolicyGuardianManagerChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "policyGuardianTimelock",
+                "type": "uint256"
+            }
+        ],
+        "name": "PolicyGuardianTimelockChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "_policyGuardian",
+                "type": "address"
+            }
+        ],
+        "name": "SecondaryPolicyGuardianChanged",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "DEFAULT_POLICY_GUARDIAN_TIMELOCK",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MAX_POLICY_GUARDIAN_TIMELOCK",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MIN_POLICY_GUARDIAN_TIMELOCK",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "QUEUED_SIGNATURE_EXPIRATION",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "acceptPolicyGuardianManager",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "customPolicyGuardianTimelocks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "disablePolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "disablePolicyGuardianGlobally",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "disablePolicyGuardianPermanently",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "disablePolicyGuardianQueueTimestamps",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signatures",
+                "type": "bytes"
+            }
+        ],
+        "name": "disablePolicyGuardianWithoutPolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "domainSeparator",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getChainId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            }
+        ],
+        "name": "getPolicyGuardianTimelock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "policyGuardianTimelock",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "_data",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bytes",
+                "name": "_signature",
+                "type": "bytes"
+            }
+        ],
+        "name": "isValidSignature",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "nonces",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pendingPolicyGuardianManager",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "policyGuardian",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "policyGuardianDisabled",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "policyGuardianManager",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "policyGuardianPermanentlyDisabled",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signatures",
+                "type": "bytes"
+            }
+        ],
+        "name": "queueDisablePolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "secondaryPolicyGuardian",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_policyGuardianManager",
+                "type": "address"
+            }
+        ],
+        "name": "setPendingPolicyGuardianManager",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_policyGuardian",
+                "type": "address"
+            }
+        ],
+        "name": "setPolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "policyGuardianTimelock",
+                "type": "uint256"
+            }
+        ],
+        "name": "setPolicyGuardianTimelock",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_policyGuardian",
+                "type": "address"
+            }
+        ],
+        "name": "setSecondaryPolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signatures",
+                "type": "bytes"
+            }
+        ],
+        "name": "unqueueDisablePolicyGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
