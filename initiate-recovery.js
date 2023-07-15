@@ -10,6 +10,7 @@ const WAYMONT_SAFE_ADVANCED_SIGNER_CONTRACT_ABI = require("./abi/WaymontSafeAdva
 const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS = "0x5B34e701393b197d267e6619d01711121F3e87Ce";
 const QUEUE_DISABLE_POLICY_GUARDIAN_TYPEHASH = "0xd5fa5ce164fba34243c3b3b9c5346acc2eae6f31655b86516d465566d0ba53f7";
 const DOMAIN_SEPARATOR_TYPEHASH = "0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218";
+const HD_PATH = "m/44/60/0/0";
 
 // Input validation
 assert(process.argv.length == 7, "Invalid number of arguments supplied--you should have exactly 5 arguments.");
@@ -27,7 +28,7 @@ let waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_P
 
 // Get HD node child signing key for Safe specified by user
 const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-const myChild = myNode.derivePath(hdPath + `/${process.argv[4]}`);
+const myChild = myNode.derivePath(HD_PATH + `/${process.argv[4]}`);
 const myChildWallet = new Wallet(myChild.privateKey);
 const myChildSigningKey = myChildWallet._signingKey();
 
