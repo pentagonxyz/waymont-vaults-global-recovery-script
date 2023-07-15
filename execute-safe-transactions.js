@@ -58,7 +58,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_CONTRACT_ABI);
 
     let packedTransactions = "0x";
-    for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, 0, tx.data.length, tx.data]).substring(2);
+    for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, tx.value ?? 0, tx.data.length, tx.data]).substring(2);
 
     let data = multiSendInterface.encodeFunctionData("multiSend", [packedTransactions]);
 
