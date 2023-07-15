@@ -13,7 +13,7 @@ const MULTI_SEND_CONTRACT_ABI = require("./abi/MultiSend.json");
 assert(process.argv.length >= 10, "Not enough arguments supplied--you should have 8 arguments if you are calling one function, 11 if you are calling two, 14 if you are calling three, and so on.");
 assert(process.argv[2].length > 0, "The JSON-RPC provider URL you entered is not valid.");
 assert(process.argv[3].length === 42 && process.argv[3].substring(0, 2) === "0x", "The wallet contract address you entered is not valid.");
-assert(/^\d+$/.test(process.argv[4]), "The wallet contract deployment nonce you entered is not valid.");
+assert(/^\d+$/.test(process.argv[4]), "The vault subkey index you entered is not valid.");
 assert(process.argv[5].length === 66 && process.argv[5].substring(0, 2) === "0x", "The funded Ethereum account private key you supplied (for gas fees) is not valid.");
 assert(process.argv[6].split(" ").length === 12, "The mnemonic seed phrase you entered is not valid (should be 12 words separated by spaces).");
 for (var i = 7; i < process.argv.length; i += 3) assert(process.argv[i].length === 42 && process.argv[i].substring(0, 2) === "0x", "One or more function call target parameters is not valid.");
