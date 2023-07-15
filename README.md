@@ -62,3 +62,12 @@ node execute-recovery.js http://localhost:8545 0xYOURVAULTSAFECONTRACTADDRESSHER
 - Replace `type your mnemonic phrase here` with your mnemonic seed phrase.
 
 In the event of failure, the execution script will also tell you how long you have left to wait.
+
+#### Using Your Recovered `Safe`
+
+```
+node execute-safe-transactions.js http://localhost:8545 0xYOURVAULTSAFECONTRACTADDRESSHERE YOURVAULTSUBKEYINDEX 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here" 0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA EXAMPLECALL1VALUE 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA EXAMPLECALL2VALUE
+```
+
+- Replace `0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA EXAMPLECALL1VALUE 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA EXAMPLECALL2VALUE` with the following values, all separated by spaces: for each transaction you want to send, enter the target address, data to be sent to the target, and ETH value to be sent to the target.
+    - If you are simply trying to send ETH to a target without any contract function call data, just use "0x" for the data parameter.
