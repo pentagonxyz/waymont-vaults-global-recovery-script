@@ -14,7 +14,7 @@ const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ABI = require("./abi/WaymontS
 const WAYMONT_SAFE_ADVANCED_SIGNER_CONTRACT_ABI = require("./abi/WaymontSafeAdvancedSigner.json");
 const MULTI_SEND_CONTRACT_ABI = require("./abi/MultiSend.json");
 
-assert(process.argv.length >= 10, "Not enough arguments supplied--you should have 8 arguments if you are calling one function, 11 if you are calling two, 14 if you are calling three, and so on.");
+assert(process.argv.length == 7, "Incorrect number of arguments supplied.");
 assert(process.argv[2].length > 0, "The JSON-RPC provider URL you entered is not valid.");
 assert(process.argv[3].length === 42 && process.argv[3].substring(0, 2) === "0x", "The wallet contract address you entered is not valid.");
 assert(/^\d+$/.test(process.argv[4]), "The wallet contract deployment nonce you entered is not valid.");
@@ -42,7 +42,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     // Ensure Safe has WaymontSafePolicyGuardianSigner as an owner
     let policyGuardianSignerContractFoundOnSafe = false;
     for (const owner of safeOwners) if (owner.toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase()) policyGuardianSignerContractFoundOnSafe = true;
-    assert(policyGuardianSignerContractFoundOnSafe, "WaymontSafePolicyGuardianSigner contract not found on this Safe. Maybe this safe has laready been recovered?");
+    assert(policyGuardianSignerContractFoundOnSafe, "WaymontSafePolicyGuardianSigner contract not found on this Safe. Maybe this safe has already been recovered?");
 
     // Check for WaymontSafeAdvancedSigner
     let myWaymontSafeAdvancedSignerContract;
@@ -63,6 +63,18 @@ const myChildSigningKey = myChildWallet._signingKey();
             if (error) myWaymontSafeAdvancedSignerContract = undefined;
             else assert(threshold == 1, "Expected WaymontSafeAdvancedSigner threshold to be 1 but threshold is greater than 1. This version of this script does not support multi-signature recovery.");
         }
+    }
+
+    // Ensure Safe has signer as an owner
+    if (myWaymontSafeAdvancedSignerContract !== undefined) {
+        const underlyingOwners = await myWaymontSafeAdvancedSignerContract.getOwners();
+        let userSignerFoundOnSafe = false;
+        for (const owner of underlyingOwners) if (owner.toLowerCase() === myChildWallet.address.toLowerCase()) userSignerFoundOnSafe = true;
+        assert(userSignerFoundOnSafe, "Supplied signing key not found on the specified Safe. Please sure yout input parameters are correct.");
+    } else {
+        let userSignerFoundOnSafe = false;
+        for (const owner of safeOwners) if (owner.toLowerCase() === myChildWallet.address.toLowerCase()) userSignerFoundOnSafe = true;
+        assert(userSignerFoundOnSafe, "Supplied signing key not found on the specified Safe. Please sure yout input parameters are correct.");
     }
 
     // Validate global WaymontSafePolicyGuardianSigner contract state
