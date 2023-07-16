@@ -2,9 +2,9 @@ const assert = require("assert");
 const ethers = require("ethers");
 
 // Import ABIs
-const SAFE_CONTRACT_ABI = require("./abi/Safe.json");
-const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ABI = require("./abi/WaymontSafePolicyGuardianSigner.json");
-const WAYMONT_SAFE_ADVANCED_SIGNER_CONTRACT_ABI = require("./abi/WaymontSafeAdvancedSigner.json");
+const SAFE_ABI = require("./abi/Safe.json");
+const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI = require("./abi/WaymontSafePolicyGuardianSigner.json");
+const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("./abi/WaymontSafeAdvancedSigner.json");
 
 // Constant addresses and typehashes
 const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS = "0x5B34e701393b197d267e6619d01711121F3e87Ce";
@@ -23,8 +23,8 @@ assert(process.argv[6].split(" ").length === 12, "The mnemonic seed phrase you e
 // Instantiate provider, EOA, and contracts
 let myProvider = new ethers.providers.JsonRpcProvider(process.argv[2]);
 let myFundedAccountForGas = new ethers.Wallet(process.argv[4], myProvider);
-let mySafeContract = new ethers.Contract(process.argv[3], SAFE_CONTRACT_ABI, myFundedAccountForGas);
-let waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ABI, myFundedAccountForGas);
+let mySafeContract = new ethers.Contract(process.argv[3], SAFE_ABI, myFundedAccountForGas);
+let waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, myFundedAccountForGas);
 
 // Get HD node child signing key for Safe specified by user
 const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
@@ -62,7 +62,7 @@ const myChildSigningKey = myChildWallet._signingKey();
         const myWaymontSafeAdvancedSignerAddress = safeOwners[0].toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase() ? safeOwners[1] : safeOwners[2];
 
         if ((await myProvider.getCode(myWaymontSafeAdvancedSignerAddress)) !== "0x") {
-            myWaymontSafeAdvancedSignerContract = new ethers.Contract(myWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_CONTRACT_ABI);
+            myWaymontSafeAdvancedSignerContract = new ethers.Contract(myWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI);
             let error, threshold;
 
             try {

@@ -2,11 +2,11 @@ const assert = require("assert");
 const ethers = require("ethers");
 
 // Import ABIs
-const SAFE_CONTRACT_ABI = require("./abi/Safe.json");
-const MULTI_SEND_CONTRACT_ABI = require("./abi/MultiSend.json");
+const SAFE_ABI = require("./abi/Safe.json");
+const MULTI_SEND_ABI = require("./abi/MultiSend.json");
 
 // Constant addresses and typehashes
-const MULTI_SEND_CONTRACT_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
+const MULTI_SEND__ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
 const DOMAIN_SEPARATOR_TYPEHASH = "0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218";
 const SAFE_TX_TYPEHASH = "0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8";
 const HD_PATH = "m/44/60/0/0";
@@ -24,7 +24,7 @@ for (var i = 9; i < process.argv.length; i += 3) assert(/^\d+$/.test(process.arg
 // Instantiate provider, EOA, and contracts
 let myProvider = new ethers.providers.JsonRpcProvider(process.argv[2]);
 let myFundedAccountForGas = new ethers.Wallet(process.argv[4], myProvider);
-let mySafeContract = new ethers.Contract(process.argv[3], SAFE_CONTRACT_ABI, myFundedAccountForGas);
+let mySafeContract = new ethers.Contract(process.argv[3], SAFE_ABI, myFundedAccountForGas);
 
 // Get HD node child signing key for Safe specified by user
 const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
@@ -55,7 +55,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     }
 
     // Encode MultiSend.multiSend function data
-    const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_CONTRACT_ABI);
+    const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_ABI);
 
     let packedTransactions = "0x";
     for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, tx.value ?? 0, tx.data.length, tx.data]).substring(2);
@@ -63,7 +63,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     let data = multiSendInterface.encodeFunctionData("multiSend", [packedTransactions]);
 
     // Prepare rest of params for Safe.execTransaction
-    const to = MULTI_SEND_CONTRACT_ADDRESS;
+    const to = MULTI_SEND__ADDRESS;
     const value = 0;
     const operation = 1;
     const safeTxGas = 0;
