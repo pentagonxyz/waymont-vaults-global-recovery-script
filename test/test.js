@@ -68,26 +68,26 @@ function predictWaymontSafeAdvancedSignerAddress(predictedSafeAddress, signers, 
         ["bytes1", "address", "bytes32", "bytes32"],
         ["0xff", WAYMONT_SAFE_FACTORY_ADDRESS, salt, initCodeHash]
     ));
-    return waymontSafeAdvancedSignerAddress;
+    return "0x" + waymontSafeAdvancedSignerAddress.substring(26);
 }
 
 function predictSafeAddress(initializerData, saltNonce) {
     const salt = ethers.utils.keccak256(ethers.utils.solidityPack(
-        ["bytes", "uint256"],
-        [initializerData, saltNonce]
+        ["bytes32", "uint256"],
+        [ethers.utils.keccak256(initializerData), saltNonce]
     ));
     const initCodeHash = ethers.utils.keccak256(ethers.utils.solidityPack(
-        ["bytes", "address"],
+        ["bytes", "uint256"],
         [
             PROXY_BYTECODE,
-            SAFE_SINGLETON_ADDRESS
+            ethers.utils.hexZeroPad(SAFE_SINGLETON_ADDRESS, 32)
         ]
     ));
     const safeAddress = ethers.utils.keccak256(ethers.utils.solidityPack(
         ["bytes1", "address", "bytes32", "bytes32"],
         ["0xff", SAFE_PROXY_FACTORY_ADDRESS, salt, initCodeHash]
     ));
-    return safeAddress;
+    return "0x" + safeAddress.substring(26);
 }
 
 // Run async code
@@ -108,11 +108,11 @@ describe("Policy guardian recovery script", function () {
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(0, 2) === "0x" ? COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(2) : COMPATIBILITY_FALLBACK_HANDLER_BYTECODE) });
 
         // Deploy Waymont Safe contracts
-        const waymontSafeFactoryContractFactory = new ethers.ContractFactory(WAYMONT_SAFE_FACTORY_ABI, WAYMONT_SAFE_FACTORY_BYTECODE);
+        const waymontSafeFactoryContractFactory = new ethers.ContractFactory(WAYMONT_SAFE_FACTORY_ABI, WAYMONT_SAFE_FACTORY_BYTECODE, relayer);
         const waymontSafeFactoryContract = await waymontSafeFactoryContractFactory.deploy(policyGuardianManager.address);
         const expectedPolicyGuardianSignerContractAddress = ethers.utils.getContractAddress({ from: waymontSafeFactoryContract.address, nonce: 1 });
-        const waymontSafePolicyGuardianSignerContract = new ethers.Contract(expectedPolicyGuardianSignerContractAddress, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI);
-        await waymontSafePolicyGuardianSignerContract.setPolicyGuardian(policyGuardian.address);
+        const waymontSafePolicyGuardianSignerContract = new ethers.Contract(expectedPolicyGuardianSignerContractAddress, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, relayer);
+        await waymontSafePolicyGuardianSignerContract.connect(policyGuardianManager).setPolicyGuardian(policyGuardian.address);
 
         // Test on Safe with policy guardian and 3 EOA signers; also test on Safe with policy guardian and advanced signer (with 1 underlying signer, 2 underlying signers, and 3 underlying signers)
         const safeInterface = new ethers.utils.Interface(SAFE_ABI);
@@ -142,10 +142,10 @@ describe("Policy guardian recovery script", function () {
                 "0x0000000000000000000000000000000000000000"
             ]);
             const safeSaltNonce = 0;
-            const safeProxyFactory = new ethers.Contract(SAFE_PROXY_FACTORY_ADDRESS, SAFE_PROXY_FACTORY_ABI);
+            const safeProxyFactory = new ethers.Contract(SAFE_PROXY_FACTORY_ADDRESS, SAFE_PROXY_FACTORY_ABI, relayer);
             await safeProxyFactory.createProxyWithNonce(SAFE_SINGLETON_ADDRESS, safeInitializerData, safeSaltNonce);
             const safeAddress = predictSafeAddress(safeInitializerData, safeSaltNonce);
-            const mySafeContract = new ethers.Contract(safeAddress, SAFE_ABI);
+            const mySafeContract = new ethers.Contract(safeAddress, SAFE_ABI, relayer);
 
             // AdvancedSigner stuff
             if (advancedSignerUnderlyingSignerCount > 0) {
@@ -210,24 +210,28 @@ describe("Policy guardian recovery script", function () {
                 console.log("Submitted Safe.execTransaction with transaction hash:", tx.transactionHash);
 
                 // Assert signers on AdvancedSigner are correct
-                const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI);
+                const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
                 const underlyingOwners = await myWaymontSafeAdvancedSignerContract.getOwners();
                 assert(underlyingOwners.length == advancedSignerUnderlyingSignerCount && underlyingOwners[0] == myChildWallet.address);
-                expect(await myWaymontSafeAdvancedSignerContract.threshold()).to.equal(2);
+                expect(await myWaymontSafeAdvancedSignerContract.getThreshold()).to.equal(2);
 
                 // Assert signers on Safe are correct
                 const safeOwners = await mySafeContract.getOwners();
                 assert(safeOwners.length == 2 && safeOwners[0] == waymontSafePolicyGuardianSignerContract.address && safeOwners[1] == predictedAdvancedSignerAddress);
-                expect(await mySafeContract.threshold()).to.equal(2);
+                expect(await mySafeContract.getThreshold()).to.equal(2);
             } else {
                 // Assert signers on Safe are correct
                 const safeOwners = await mySafeContract.getOwners();
                 assert(safeOwners.length == 4 && safeOwners[0] == waymontSafePolicyGuardianSignerContract.address && safeOwners[1] == myChildWallet.address);
-                expect(await mySafeContract.threshold()).to.equal(2);
+                expect(await mySafeContract.getThreshold()).to.equal(2);
             }
 
+            // Generate relayer key
+            const relayer2 = ethers.Wallet.createRandom();
+            await relayer.sendTransaction({ to: relayer2.address, value: "1000000000000000000" });
+
             // Run script: initiate-recovery.js
-            await runAndWait("npm run initiate-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+            await runAndWait("npm run initiate-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
             
             // Assert recovery process has begun
             expect(await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(safeAddress)).to.be.above(0);
@@ -236,13 +240,13 @@ describe("Policy guardian recovery script", function () {
             await ethers.provider.send("evm_increaseTime", [14 * 86400 - 60]);
 
             // Expect failure running script: execute-recovery.js
-            assert.throws(runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\""));
+            assert.throws(runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\""));
             
             // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime)
             await ethers.provider.send("evm_increaseTime", [60]);
 
             // Run script: execute-recovery.js
-            await runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+            await runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
             
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
@@ -250,12 +254,12 @@ describe("Policy guardian recovery script", function () {
             for (const i = 1; i < advancedSignerUnderlyingSignerCount; i++) assert(safeOwners[i] == extraSigners[i - 1]);
             
             // Deploy dummy storage contract and get calldata to store value
-            const storageContractFactory = new ethers.ContractFactory(STORAGE_ABI, STORAGE_BYTECODE);
+            const storageContractFactory = new ethers.ContractFactory(STORAGE_ABI, STORAGE_BYTECODE, relayer);
             const storageContract = await storageContractFactory.deploy();
             const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
             // Run script: execute-safe-transactions.js
-            await runAndWait("npm run execute-safe-transactions http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\" " + storageContract.address + " " + exampleCall1Data +  " 0 0x0000000000000000000000000000000000002222 0x 1234");
+            await runAndWait("npm run execute-safe-transactions http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\" " + storageContract.address + " " + exampleCall1Data +  " 0 0x0000000000000000000000000000000000002222 0x 1234");
 
             // Assertions
             expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
