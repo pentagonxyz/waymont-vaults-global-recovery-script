@@ -6,10 +6,10 @@ const childProcess = require("child_process");
 const crypto = require("crypto");
 
 const WAYMONT_SAFE_FACTORY_ABI = require("./abi/WaymontSafeFactory.json");
-const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI = require("../abi/WaymontSafePolicyGuardianSigner.json");
-const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("../abi/WaymontSafePolicyGuardianSigner.json");
-const SAFE_ABI = require("../abi/Safe.json");
-const MULTI_SEND_ABI = require("../abi/MultiSend.json");
+const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI = require("../src/abi/WaymontSafePolicyGuardianSigner.json");
+const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("../src/abi/WaymontSafePolicyGuardianSigner.json");
+const SAFE_ABI = require("../src/abi/Safe.json");
+const MULTI_SEND_ABI = require("../src/abi/MultiSend.json");
 const SAFE_PROXY_FACTORY_ABI = require("./abi/SafeProxyFactory.json");
 const STORAGE_ABI = require("./abi/Storage.json");
 
@@ -92,11 +92,6 @@ function predictSafeAddress(initializerData, saltNonce) {
 
 // Run async code
 (async function() {
-    // TODO: npm i --save-dev hardhat
-    // TODO: npm i --save assert
-    // TODO: if not already installed: npm i --save-dev chai
-    // TODO: More assertions?
-
     // Get signers
     const [relayer, policyGuardianManager, policyGuardian] = await ethers.getSigners();
 
@@ -230,7 +225,7 @@ function predictSafeAddress(initializerData, saltNonce) {
         }
 
         // Run script: initiate-recovery.js
-        await runAndWait("node " + __dirname + "/initiate-recovery.js http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+        await runAndWait("npm run initiate-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
         
         // Assert recovery process has begun
         expect(await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(safeAddress)).to.be.above(0);
@@ -239,13 +234,13 @@ function predictSafeAddress(initializerData, saltNonce) {
         await ethers.provider.send("evm_increaseTime", [14 * 86400 - 60]);
 
         // Expect failure running script: execute-recovery.js
-        assert.throws(runAndWait("node " + __dirname + "/execute-recovery.js http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\""));
+        assert.throws(runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\""));
         
         // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime)
         await ethers.provider.send("evm_increaseTime", [60]);
 
         // Run script: execute-recovery.js
-        await runAndWait("node " + __dirname + "/execute-recovery.js http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+        await runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
         
         // Assert policy guardian signer no longer present and rest of signers are correct
         const safeOwners = await mySafeContract.getOwners();
@@ -258,7 +253,7 @@ function predictSafeAddress(initializerData, saltNonce) {
         const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
         // Run script: execute-safe-transactions.js
-        await runAndWait("node " + __dirname + "/execute-safe-transactions.js http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\" " + storageContract.address + " " + exampleCall1Data +  " 0 0x0000000000000000000000000000000000002222 0x 1234");
+        await runAndWait("npm run execute-safe-transactions http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\" " + storageContract.address + " " + exampleCall1Data +  " 0 0x0000000000000000000000000000000000002222 0x 1234");
 
         // Assertions
         expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
