@@ -1,0 +1,179 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_policyGuardianManager",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "contract WaymontSafeTimelockedRecoveryModule",
+                "name": "timelockedRecoveryModule",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "signedDataHash",
+                "type": "bytes32"
+            }
+        ],
+        "name": "SignatureQueued",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "advancedSignerImplementation",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "signers",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "threshold",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deploymentNonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "createAdvancedSigner",
+        "outputs": [
+            {
+                "internalType": "contract WaymontSafeAdvancedSigner",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract Safe",
+                "name": "safe",
+                "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "signers",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "threshold",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "signingTimelock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "requirePolicyGuardian",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deploymentNonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "createTimelockedRecoveryModule",
+        "outputs": [
+            {
+                "internalType": "contract WaymontSafeTimelockedRecoveryModule",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "signedDataHash",
+                "type": "bytes32"
+            }
+        ],
+        "name": "emitSignatureQueued",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "policyGuardianSigner",
+        "outputs": [
+            {
+                "internalType": "contract WaymontSafePolicyGuardianSigner",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "timelockedRecoveryModuleImplementation",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
