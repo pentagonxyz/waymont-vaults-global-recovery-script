@@ -33,9 +33,9 @@ const EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE = "shove modify pet author control topic
 const EXAMPLE_VAULT_SUBKEY_INDEX = 12345678;
 const HD_PATH = "m/44/60/0/0";
 
-function runAndWait(script) {
+function runAndWait(script, args) {
     return new Promise((resolve, reject) => {
-        var process = childProcess.fork(script);
+        var process = childProcess.fork(script, args);
         process.on("error", reject);
         process.on("exit", (error) => {
             if (error == 0) resolve();
@@ -231,7 +231,13 @@ describe("Policy guardian recovery script", function () {
             await relayer.sendTransaction({ to: relayer2.address, value: "1000000000000000000" });
 
             // Run script: initiate-recovery.js
-            await runAndWait("npm run initiate-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+            await runAndWait(__dirname + "/../src/initiate-recovery.js", [
+                "http://localhost:8545",
+                safeAddress,
+                EXAMPLE_VAULT_SUBKEY_INDEX,
+                relayer2._signingKey().privateKey,
+                EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
+            ]);
             
             // Assert recovery process has begun
             expect(await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(safeAddress)).to.be.above(0);
@@ -240,13 +246,25 @@ describe("Policy guardian recovery script", function () {
             await ethers.provider.send("evm_increaseTime", [14 * 86400 - 60]);
 
             // Expect failure running script: execute-recovery.js
-            assert.throws(runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\""));
+            assert.throws(runAndWait(__dirname + "/../src/execute-recovery.js", [
+                "http://localhost:8545",
+                safeAddress,
+                EXAMPLE_VAULT_SUBKEY_INDEX,
+                relayer2._signingKey().privateKey,
+                EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
+            ]));
             
             // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime)
             await ethers.provider.send("evm_increaseTime", [60]);
 
             // Run script: execute-recovery.js
-            await runAndWait("npm run execute-recovery http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\"");
+            await runAndWait(__dirname + "/../src/execute-recovery.js", [
+                "http://localhost:8545",
+                safeAddress,
+                EXAMPLE_VAULT_SUBKEY_INDEX,
+                relayer2._signingKey().privateKey,
+                EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
+            ]);
             
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
@@ -259,7 +277,19 @@ describe("Policy guardian recovery script", function () {
             const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
             // Run script: execute-safe-transactions.js
-            await runAndWait("npm run execute-safe-transactions http://localhost:8545 " + safeAddress + " " + EXAMPLE_VAULT_SUBKEY_INDEX + " " + relayer2._signingKey().privateKey + " \"" + EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE + "\" " + storageContract.address + " " + exampleCall1Data +  " 0 0x0000000000000000000000000000000000002222 0x 1234");
+            await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
+                "http://localhost:8545",
+                safeAddress,
+                EXAMPLE_VAULT_SUBKEY_INDEX,
+                relayer2._signingKey().privateKey,
+                EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE,
+                storageContract.address,
+                exampleCall1Data,
+                "0",
+                "0x0000000000000000000000000000000000002222",
+                "0x",
+                "1234"
+            ]);
 
             // Assertions
             expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
