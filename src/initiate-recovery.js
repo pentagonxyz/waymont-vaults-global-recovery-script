@@ -22,14 +22,14 @@ assert(process.argv[6].split(" ").length === 12, "The mnemonic seed phrase you e
 
 // Instantiate provider, EOA, and contracts
 let myProvider = new ethers.providers.JsonRpcProvider(process.argv[2]);
-let myFundedAccountForGas = new ethers.Wallet(process.argv[4], myProvider);
+let myFundedAccountForGas = new ethers.Wallet(process.argv[5], myProvider);
 let mySafeContract = new ethers.Contract(process.argv[3], SAFE_ABI, myFundedAccountForGas);
 let waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, myFundedAccountForGas);
 
 // Get HD node child signing key for Safe specified by user
-const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+const myNode = ethers.utils.HDNode.fromMnemonic(process.argv[6]);
 const myChild = myNode.derivePath(HD_PATH + `/${process.argv[4]}`);
-const myChildWallet = new Wallet(myChild.privateKey);
+const myChildWallet = new ethers.Wallet(myChild.privateKey);
 const myChildSigningKey = myChildWallet._signingKey();
 
 // Run async code
@@ -77,7 +77,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     }
 
     // Generate signature for queueDisablePolicyGuardian
-    let nonce = ++(await waymontSafePolicyGuardianSignerContract.nonce(mySafeContract.address));
+    let nonce = (await waymontSafePolicyGuardianSignerContract.nonce(mySafeContract.address)) + 1;
     let underlyingHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "address", "uint256"], [QUEUE_DISABLE_POLICY_GUARDIAN_TYPEHASH, mySafeContract.address, nonce]));
     let domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, waymontSafePolicyGuardianSignerContract.address]));
     let overlyingHash = ethers.utils.solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [0x19, 0x01, domainSeparator, underlyingHash]);

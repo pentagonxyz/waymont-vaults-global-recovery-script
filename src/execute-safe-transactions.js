@@ -23,13 +23,13 @@ for (var i = 9; i < process.argv.length; i += 3) assert(/^\d+$/.test(process.arg
 
 // Instantiate provider, EOA, and contracts
 let myProvider = new ethers.providers.JsonRpcProvider(process.argv[2]);
-let myFundedAccountForGas = new ethers.Wallet(process.argv[4], myProvider);
+let myFundedAccountForGas = new ethers.Wallet(process.argv[5], myProvider);
 let mySafeContract = new ethers.Contract(process.argv[3], SAFE_ABI, myFundedAccountForGas);
 
 // Get HD node child signing key for Safe specified by user
-const myNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+const myNode = ethers.utils.HDNode.fromMnemonic(process.argv[6]);
 const myChild = myNode.derivePath(HD_PATH + `/${process.argv[4]}`);
-const myChildWallet = new Wallet(myChild.privateKey);
+const myChildWallet = new ethers.Wallet(myChild.privateKey);
 const myChildSigningKey = myChildWallet._signingKey();
 
 // Run async code

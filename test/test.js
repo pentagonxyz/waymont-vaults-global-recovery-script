@@ -232,7 +232,7 @@ describe("Policy guardian recovery script", function () {
 
             // Run script: initiate-recovery.js
             await runAndWait(__dirname + "/../src/initiate-recovery.js", [
-                "http://localhost:8545",
+                ethers.provider.connection.url,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -247,7 +247,7 @@ describe("Policy guardian recovery script", function () {
 
             // Expect failure running script: execute-recovery.js
             assert.throws(runAndWait(__dirname + "/../src/execute-recovery.js", [
-                "http://localhost:8545",
+                ethers.provider.connection.url,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -259,7 +259,7 @@ describe("Policy guardian recovery script", function () {
 
             // Run script: execute-recovery.js
             await runAndWait(__dirname + "/../src/execute-recovery.js", [
-                "http://localhost:8545",
+                ethers.provider.connection.url,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -278,7 +278,7 @@ describe("Policy guardian recovery script", function () {
 
             // Run script: execute-safe-transactions.js
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
-                "http://localhost:8545",
+                ethers.provider.connection.url,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
