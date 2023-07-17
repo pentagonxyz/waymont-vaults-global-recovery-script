@@ -259,7 +259,7 @@ describe("Policy guardian recovery script", function () {
             await ethers.provider.send("evm_mine");
 
             // Expect failure running script: execute-recovery.js
-            assert.throws(runAndWait(__dirname + "/../src/execute-recovery.js", [
+            assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
                 providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
