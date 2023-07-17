@@ -230,9 +230,13 @@ describe("Policy guardian recovery script", function () {
             const relayer2 = ethers.Wallet.createRandom();
             await relayer.sendTransaction({ to: relayer2.address, value: "1000000000000000000" });
 
+            // Fix provider URL in case it tries to resolve localhost to ::1 (IPv6) instead of 127.0.0.1 (IPv4)
+            const providerUrl = new URL(ethers.provider.connection.url);
+            if (providerUrl.hostname == "localhost") providerUrl.hostname = "127.0.0.1";
+
             // Run script: initiate-recovery.js
             await runAndWait(__dirname + "/../src/initiate-recovery.js", [
-                ethers.provider.connection.url,
+                providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -247,7 +251,7 @@ describe("Policy guardian recovery script", function () {
 
             // Expect failure running script: execute-recovery.js
             assert.throws(runAndWait(__dirname + "/../src/execute-recovery.js", [
-                ethers.provider.connection.url,
+                providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -259,7 +263,7 @@ describe("Policy guardian recovery script", function () {
 
             // Run script: execute-recovery.js
             await runAndWait(__dirname + "/../src/execute-recovery.js", [
-                ethers.provider.connection.url,
+                providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -278,7 +282,7 @@ describe("Policy guardian recovery script", function () {
 
             // Run script: execute-safe-transactions.js
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
-                ethers.provider.connection.url,
+                providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,

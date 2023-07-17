@@ -23,6 +23,7 @@ First, export your 12-word mnemonic seed phrase (root private key) and your vaul
 ### Command Line Prerequisites
 
 1. [Download and install Node.js](https://nodejs.org/en/download/) or [install Node.js via a package manager](https://nodejs.org/en/download/package-manager/) (we prefer [`nvm`--Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script)).
+    - The script has been tested with Node.js version `v18.16.0`.
 2. **WARNING: Before running the scripts, run the following command to disable bash (command line) history so your unencrypted seed phrase is NOT saved to disk: `set +o history`**
 
 ### Recover Each Vault Address Individually
