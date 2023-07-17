@@ -87,8 +87,8 @@ const myChildSigningKey = myChildWallet._signingKey();
         const alreadyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianDisabled(mySafeContract.address);
 
         if (!alreadyDisabled) {
-            const timelock = await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address);
-            const queueTimestamp = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address);
+            const timelock = (await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address)).toNumber();
+            const queueTimestamp = (await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address)).toNumber();
             assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
             const latestBlockTimestamp = (await myProvider.getBlock("latest")).timestamp;
             const timeRemaining = queueTimestamp + timelock - latestBlockTimestamp;
