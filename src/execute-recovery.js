@@ -331,10 +331,17 @@ const myChildSigningKey = myChildWallet._signingKey();
     let packedOverlyingSignatures;
 
     if (myWaymontSafeAdvancedSignerContract === undefined) {
-        packedOverlyingSignatures = ethers.utils.solidityPack(
-            ["bytes", "bytes", "bytes"],
-            [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
-        );
+        if (myChildWallet.address.toLowerCase() > waymontSafePolicyGuardianSignerContract.address.toLowerCase()) {
+            packedOverlyingSignatures = ethers.utils.solidityPack(
+                ["bytes", "bytes", "bytes"],
+                [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
+            );
+        } else {
+            packedOverlyingSignatures = ethers.utils.solidityPack(
+                ["bytes", "bytes", "bytes"],
+                [userSignature, policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData]
+            );
+        }
     } else {
         // Generate overlying WaymontSafeAdvancedSigner signature
         const advancedSignerOverlyingSignaturePointer = ethers.utils.solidityPack(

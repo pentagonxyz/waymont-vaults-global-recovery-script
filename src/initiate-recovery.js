@@ -105,10 +105,17 @@ const myChildSigningKey = myChildWallet._signingKey();
     let packedOverlyingSignaturesForQueueing;
 
     if (myWaymontSafeAdvancedSignerContract === undefined) {
-        packedOverlyingSignaturesForQueueing = ethers.utils.solidityPack(
-            ["bytes", "bytes", "bytes"],
-            [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
-        );
+        if (myChildWallet.address.toLowerCase() > waymontSafePolicyGuardianSignerContract.address.toLowerCase()) {
+            packedOverlyingSignaturesForQueueing = ethers.utils.solidityPack(
+                ["bytes", "bytes", "bytes"],
+                [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
+            );
+        } else {
+            packedOverlyingSignaturesForQueueing = ethers.utils.solidityPack(
+                ["bytes", "bytes", "bytes"],
+                [userSignature, policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData]
+            );
+        }
     } else {
         // Generate overlying WaymontSafeAdvancedSigner signature (to queue disabling)
         const advancedSignerOverlyingSignaturePointer = ethers.utils.solidityPack(
