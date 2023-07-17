@@ -267,8 +267,9 @@ describe("Policy guardian recovery script", function () {
                 EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
             ]));
             
-            // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime)
+            // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
             await ethers.provider.send("evm_increaseTime", [60]);
+            await ethers.provider.send("evm_mine");
 
             // Run script: execute-recovery.js
             await runAndWait(__dirname + "/../src/execute-recovery.js", [
