@@ -28,6 +28,10 @@ const SAFE_SINGLETON_ADDRESS = "0xc962E67D9490E154D81181879ddf4CD3b65D2132";
 const SAFE_PROXY_FACTORY_ADDRESS = "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67";
 const COMPATIBILITY_FALLBACK_HANDLER_ADDRESS = "0x2a15DE4410d4c8af0A7b6c12803120f43C42B820";
 const MULTI_SEND_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
+const WAYMONT_SAFE_FACTORY_ADDRESS = "0xf4699AE909Ee03e72e57F2a8BBB01C47B71C34f7";
+const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS = "0x5B34e701393b197d267e6619d01711121F3e87Ce";
+const WAYMONT_SAFE_ADVANCED_SIGNER_IMPLEMENTATION_ADDRESS = "0x1987Af72Db975d7909F5b9444ad9aEeADd3850F1";
+const WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS = "0x67161d9ad1478ae44b35d24985f2d7c4cb88f61a";
 
 const EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE = "shove modify pet author control topic today opera okay payment diary provide";
 const EXAMPLE_VAULT_SUBKEY_INDEX = 12345678;
@@ -94,25 +98,28 @@ function predictSafeAddress(initializerData, saltNonce) {
 describe("Policy guardian recovery script", function () {
     it("Scripts should recover the Safe from the policy guardian", async function () {
         // Get signers
-        const [relayer, policyGuardianManager, policyGuardian] = await ethers.getSigners();
+        const [relayer, policyGuardian] = await ethers.getSigners();
 
         // Deploy Safe singleton factory
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_DEPLOYER_ADDRESS, value: "1000000000000000000" });
-        const impersonatedSigner = await ethers.getImpersonatedSigner(SAFE_SINGLETON_FACTORY_DEPLOYER_ADDRESS);
-        await impersonatedSigner.sendTransaction({ data: SAFE_SINGLETON_FACTORY_BYTECODE });
+        const impersonatedSafeSingletonFactoryDeployer = await ethers.getImpersonatedSigner(SAFE_SINGLETON_FACTORY_DEPLOYER_ADDRESS);
+        await impersonatedSafeSingletonFactoryDeployer.sendTransaction({ data: SAFE_SINGLETON_FACTORY_BYTECODE });
 
         // Deploy Safe implementation, Safe proxy factory, etc.
-        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_BYTECODE.substring(0, 2) === "0x" ? SAFE_BYTECODE.substring(2) : SAFE_BYTECODE) });
-        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_PROXY_FACTORY_BYTECODE.substring(0, 2) === "0x" ? SAFE_PROXY_FACTORY_BYTECODE.substring(2) : SAFE_PROXY_FACTORY_BYTECODE) });
-        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (MULTI_SEND_BYTECODE.substring(0, 2) === "0x" ? MULTI_SEND_BYTECODE.substring(2) : MULTI_SEND_BYTECODE) });
-        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(0, 2) === "0x" ? COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(2) : COMPATIBILITY_FALLBACK_HANDLER_BYTECODE) });
+        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_BYTECODE.startsWith("0x") ? SAFE_BYTECODE.substring(2) : SAFE_BYTECODE) });
+        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_PROXY_FACTORY_BYTECODE.startsWith("0x") ? SAFE_PROXY_FACTORY_BYTECODE.substring(2) : SAFE_PROXY_FACTORY_BYTECODE) });
+        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (MULTI_SEND_BYTECODE.startsWith("0x") ? MULTI_SEND_BYTECODE.substring(2) : MULTI_SEND_BYTECODE) });
+        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.startsWith("0x") ? COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(2) : COMPATIBILITY_FALLBACK_HANDLER_BYTECODE) });
 
-        // Deploy Waymont Safe contracts
-        const waymontSafeFactoryContractFactory = new ethers.ContractFactory(WAYMONT_SAFE_FACTORY_ABI, WAYMONT_SAFE_FACTORY_BYTECODE, relayer);
-        const waymontSafeFactoryContract = await waymontSafeFactoryContractFactory.deploy(policyGuardianManager.address);
-        const expectedPolicyGuardianSignerContractAddress = ethers.utils.getContractAddress({ from: waymontSafeFactoryContract.address, nonce: 1 });
-        const waymontSafePolicyGuardianSignerContract = new ethers.Contract(expectedPolicyGuardianSignerContractAddress, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, relayer);
-        await waymontSafePolicyGuardianSignerContract.connect(policyGuardianManager).setPolicyGuardian(policyGuardian.address);
+        // Deploy WaymontSafeFactory
+        await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (WAYMONT_SAFE_FACTORY_BYTECODE.startsWith("0x") ? WAYMONT_SAFE_FACTORY_BYTECODE.substring(2) : WAYMONT_SAFE_FACTORY_BYTECODE) + ethers.utils.defaultAbiCoder.encode(["address"], [WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS]).substring(2) });
+        const waymontSafeFactoryContract = new ethers.Contract(WAYMONT_SAFE_FACTORY_ADDRESS, WAYMONT_SAFE_FACTORY_ABI);
+
+        // Set policy guardian on WaymontSafePolicyGuardianSigner
+        const waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, relayer);
+        await relayer.sendTransaction({ to: WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS, value: "1000000000000000000" });
+        const impersonatedPolicyGuardianManager = await ethers.getImpersonatedSigner(WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS);
+        await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).setPolicyGuardian(policyGuardian.address);
 
         // Test on Safe with policy guardian and 3 EOA signers; also test on Safe with policy guardian and advanced signer (with 1 underlying signer, 2 underlying signers, and 3 underlying signers)
         const safeInterface = new ethers.utils.Interface(SAFE_ABI);
@@ -163,8 +170,8 @@ describe("Policy guardian recovery script", function () {
                         data: safe.interface.encodeFunctionData("addOwnerWithThreshold", [predictedAdvancedSignerAddress, 2])
                     },
                     {
-                        to: waymontSafeFactory.address,
-                        data: waymontSafeFactory.interface.encodeFunctionData("createAdvancedSigner", [safeAddress, underlyingSigners, underlyingThreshold, advancedSignerDeploymentNonce])
+                        to: waymontSafeFactoryContract.address,
+                        data: waymontSafeFactoryContract.interface.encodeFunctionData("createAdvancedSigner", [safeAddress, underlyingSigners, underlyingThreshold, advancedSignerDeploymentNonce])
                     },
                 ];
 
