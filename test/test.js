@@ -254,8 +254,9 @@ describe("Policy guardian recovery script", function () {
             // Assert recovery process has begun
             expect(await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(safeAddress)).to.be.above(0);
 
-            // Wait almost 14 days (evm_increaseTime)
+            // Wait almost 14 days (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
             await ethers.provider.send("evm_increaseTime", [14 * 86400 - 60]);
+            await ethers.provider.send("evm_mine");
 
             // Expect failure running script: execute-recovery.js
             assert.throws(runAndWait(__dirname + "/../src/execute-recovery.js", [
