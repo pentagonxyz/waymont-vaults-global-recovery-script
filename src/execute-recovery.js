@@ -79,24 +79,24 @@ const myChildSigningKey = myChildWallet._signingKey();
     }
 
     // Validate global WaymontSafePolicyGuardianSigner contract state
-    let policyGuardian = await waymontSafePolicyGuardianSignerContract.policyGuardian();
-    let policyGuardianPermanentlyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianPermanentlyDisabled();
+    const policyGuardian = await waymontSafePolicyGuardianSignerContract.policyGuardian();
+    const policyGuardianPermanentlyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianPermanentlyDisabled();
 
     if (policyGuardian !== "0x0000000000000000000000000000000000000000" && !policyGuardianPermanentlyDisabled) {
         // Validate WaymontSafePolicyGuardianSigner contract state for the specified Safe
-        let alreadyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianDisabled(mySafeContract.address);
+        const alreadyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianDisabled(mySafeContract.address);
 
         if (!alreadyDisabled) {
-            let timelock = await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address);
-            let queueTimestamp = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address);
+            const timelock = await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address);
+            const queueTimestamp = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address);
             assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
             assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated.");
 
             // Generate signature for queueDisablePolicyGuardian
-            let nonce = (await waymontSafePolicyGuardianSignerContract.nonces(mySafeContract.address)) + 1;
-            let underlyingHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "address", "uint256"], [DISABLE_POLICY_GUARDIAN_TYPEHASH, mySafeContract.address, nonce]));
-            let domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, waymontSafePolicyGuardianSignerContract.address]));
-            let overlyingHash = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [0x19, 0x01, domainSeparator, underlyingHash]));
+            const nonce = (await waymontSafePolicyGuardianSignerContract.nonces(mySafeContract.address)) + 1;
+            const underlyingHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "address", "uint256"], [DISABLE_POLICY_GUARDIAN_TYPEHASH, mySafeContract.address, nonce]));
+            const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, waymontSafePolicyGuardianSignerContract.address]));
+            const overlyingHash = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [0x19, 0x01, domainSeparator, underlyingHash]));
             const userSignatureUnserialized = myChildSigningKey.signDigest(overlyingHash);
             const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
 
