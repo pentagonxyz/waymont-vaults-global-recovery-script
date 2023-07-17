@@ -90,7 +90,13 @@ const myChildSigningKey = myChildWallet._signingKey();
             const timelock = await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address);
             const queueTimestamp = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address);
             assert(queueTimestamp > 0, "Wallet recovery has not been initiated. Please run the intiation script first.");
-            assert(queueTimestamp + timelock <= (new Date()).getTime() / 1000, "Timelock has not yet passed, though wallet recovery has been initiated.");
+            const latestBlockTimestamp = (await myProvider.getBlock("latest")).timestamp;
+            const timeRemaining = queueTimestamp + timelock - latestBlockTimestamp;
+            const days = Math.floor(timeRemaining / 86400);
+            const hours = Math.floor(timeRemaining % 86400 / 3600);
+            const minutes = Math.floor(timeRemaining % 3600 / 60);
+            const seconds = timeRemaining % 60;
+            assert(queueTimestamp + timelock <= latestBlockTimestamp, "Timelock has not yet passed on-chain (judging by the latest block timestamp), though wallet recovery has been initiated. Latest block timestamp on this chain is currently " + days + " days, " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds away from the timelock ending. Wait for this duration to pass and re-run this script.");
 
             // Generate signature for disablePolicyGuardianWithoutPolicyGuardian
             const nonce = await waymontSafePolicyGuardianSignerContract.nonces(mySafeContract.address);
