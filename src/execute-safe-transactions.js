@@ -89,7 +89,8 @@ const myChildSigningKey = myChildWallet._signingKey();
     );
 
     const overlyingHash = ethers.utils.keccak256(encodedTransactionData);
-    const userSignature = myChildSigningKey.signDigest(overlyingHash);
+    const userSignatureUnserialized = myChildSigningKey.signDigest(overlyingHash);
+    const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
 
     // Dispatch TX
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);

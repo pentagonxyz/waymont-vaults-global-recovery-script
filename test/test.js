@@ -210,8 +210,9 @@ describe("Policy guardian recovery script", function () {
                 );
 
                 const overlyingHash = ethers.utils.keccak256(encodedTransactionData);
-                const userSignature = myChildSigningKey.signDigest(overlyingHash);
-
+                const userSignatureUnserialized = myChildSigningKey.signDigest(overlyingHash);
+                const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
+            
                 // Dispatch TX
                 const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
                 console.log("Submitted Safe.execTransaction with transaction hash:", tx.transactionHash);
