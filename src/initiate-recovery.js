@@ -41,7 +41,7 @@ const myChildSigningKey = myChildWallet._signingKey();
 
     // Validate WaymontSafePolicyGuardianSigner contract state for the specified Safe
     let alreadyDisabled = await waymontSafePolicyGuardianSignerContract.policyGuardianDisabled(mySafeContract.address);
-    assert(alreadyDisabled > 0, "Policy guardian has already been disabled on this Safe. Use the recovery execution script instead.");
+    assert(!alreadyDisabled, "Policy guardian has already been disabled on this Safe. Use the recovery execution script instead.");
     let timelock = await waymontSafePolicyGuardianSignerContract.getPolicyGuardianTimelock(mySafeContract.address);
     let queueTimestamp = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianQueueTimestamps(mySafeContract.address);
     assert(queueTimestamp == 0, queueTimestamp + timelock <= (new Date()).getTime() / 1000 ? "Timelock has already passed. Use the recovery execution script instead." : "Safe recovery has been initiated but timelock has not passed. " + (queueTimestamp + timelock - (new Date()).getTime() / 1000) + " seconds to go.");
