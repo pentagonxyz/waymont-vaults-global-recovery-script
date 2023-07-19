@@ -204,7 +204,7 @@ describe("Policy guardian recovery script", function () {
                 const safeTxHash = ethers.utils.keccak256(encodedData);
                 const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, mySafeContract.address]));
 
-                const encodedTransactionData = solidityPack(
+                const encodedTransactionData = ethers.utils.solidityPack(
                     ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
                     ['0x19', '0x01', domainSeparator, safeTxHash],
                 );
@@ -215,7 +215,7 @@ describe("Policy guardian recovery script", function () {
             
                 // Dispatch TX
                 const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
-                console.log("Submitted Safe.execTransaction with transaction hash:", tx.transactionHash);
+                console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
 
                 // Assert signers on AdvancedSigner are correct
                 const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
@@ -257,7 +257,7 @@ describe("Policy guardian recovery script", function () {
             // Wait almost 14 days (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
             await ethers.provider.send("evm_increaseTime", [14 * 86400 - 60]);
             await ethers.provider.send("evm_mine");
-
+        
             // Expect failure running script: execute-recovery.js
             assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
                 providerUrl.href,
@@ -266,11 +266,11 @@ describe("Policy guardian recovery script", function () {
                 relayer2._signingKey().privateKey,
                 EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
             ]));
-            
+        
             // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
             await ethers.provider.send("evm_increaseTime", [60]);
             await ethers.provider.send("evm_mine");
-
+        
             // Run script: execute-recovery.js
             await runAndWait(__dirname + "/../src/execute-recovery.js", [
                 providerUrl.href,
@@ -279,17 +279,18 @@ describe("Policy guardian recovery script", function () {
                 relayer2._signingKey().privateKey,
                 EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
             ]);
-            
+        
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
             assert(safeOwners.length == advancedSignerUnderlyingSignerCount > 0 ? advancedSignerUnderlyingSignerCount : 3 && safeOwners[0] == myChildWallet.address);
             for (const i = 1; i < advancedSignerUnderlyingSignerCount; i++) assert(safeOwners[i] == extraSigners[i - 1]);
-            
+        
             // Deploy dummy storage contract and get calldata to store value
             const storageContractFactory = new ethers.ContractFactory(STORAGE_ABI, STORAGE_BYTECODE, relayer);
             const storageContract = await storageContractFactory.deploy();
             const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
+        
             // Run script: execute-safe-transactions.js
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
                 providerUrl.href,
@@ -304,7 +305,7 @@ describe("Policy guardian recovery script", function () {
                 "0x",
                 "1234"
             ]);
-
+        
             // Assertions
             expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
             expect(await provider.getBalance("0x0000000000000000000000000000000000002222")).to.equal(1234);

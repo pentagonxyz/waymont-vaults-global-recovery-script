@@ -83,7 +83,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const safeTxHash = ethers.utils.keccak256(encodedData);
     const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, mySafeContract.address]));
 
-    const encodedTransactionData = solidityPack(
+    const encodedTransactionData = ethers.utils.solidityPack(
         ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
         ['0x19', '0x01', domainSeparator, safeTxHash],
     );
@@ -94,5 +94,5 @@ const myChildSigningKey = myChildWallet._signingKey();
 
     // Dispatch TX
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
-    console.log("Submitted Safe.execTransaction with transaction hash:", tx.transactionHash);
+    console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
 })();

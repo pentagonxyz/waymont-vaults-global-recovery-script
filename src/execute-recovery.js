@@ -172,7 +172,7 @@ const myChildSigningKey = myChildWallet._signingKey();
 
             // Dispatch TX
             let tx = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianWithoutPolicyGuardian(mySafeContract.address, packedOverlyingSignatures);
-            console.log("Submitted WaymontSafePolicyGuardianSigner.disablePolicyGuardianWithoutPolicyGuardian with transaction hash:", tx.transactionHash);
+            console.log("Submitted WaymontSafePolicyGuardianSigner.disablePolicyGuardianWithoutPolicyGuardian with transaction hash:", tx.hash);
         }
     }
 
@@ -184,7 +184,7 @@ const myChildSigningKey = myChildWallet._signingKey();
         const underlyingOwners = await myWaymontSafeAdvancedSignerContract.getOwners();
         const policyGuardianSignerContractIsFirstOwnerInLinkedList = safeOwners[0].toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase();
         assert((policyGuardianSignerContractIsFirstOwnerInLinkedList ? safeOwners[1] : safeOwners[0]).toLowerCase() === myWaymontSafeAdvancedSignerContract.address.toLowerCase(), "Unexpected error when checking if WaymontSafePolicyGuardianSigner contract is first signer in linked list of Safe owners");
-
+    
         if (underlyingOwners.length > 2) {
             // Swap WaymontSafePolicyGuardianSigner for underlyingOwners[0], swap WaymontSafeAdvancedSigner for underlyingOwners[1], and add the rest of underlyingOwners (setting threshold to 1)
             transactions = [
@@ -283,11 +283,14 @@ const myChildSigningKey = myChildWallet._signingKey();
         transactions = [
             {
                 to: mySafeContract.address,
-                data: mySafeContract.interface.removeOwner(prevOwner, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, 1)
+                data: mySafeContract.interface.encodeFunctionData(
+                    "removeOwner",
+                    [prevOwner, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, 1]
+                )
             }
         ];
     }
-
+        
     // Encode MultiSend.multiSend function data
     const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_ABI);
 
@@ -307,7 +310,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const refundReceiver = "0x0000000000000000000000000000000000000000";
 
     // Sign params for Safe.execTransaction
-    const nonce = mySafeContract.nonce();
+    const nonce = await mySafeContract.nonce();
 
     const encodedData = ethers.utils.defaultAbiCoder.encode(
         ['bytes32', 'address', 'uint256', 'bytes32', 'uint8', 'uint256', 'uint256', 'uint256', 'address', 'address', 'uint256'],
@@ -317,7 +320,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const safeTxHash = ethers.utils.keccak256(encodedData);
     const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, mySafeContract.address]));
 
-    const encodedTransactionData = solidityPack(
+    const encodedTransactionData = ethers.utils.solidityPack(
         ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
         ['0x19', '0x01', domainSeparator, safeTxHash],
     );
@@ -392,5 +395,5 @@ const myChildSigningKey = myChildWallet._signingKey();
 
     // Dispatch TX
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, packedOverlyingSignatures);
-    console.log("Submitted Safe.execTransaction with transaction hash:", tx.transactionHash);
+    console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
 })();
