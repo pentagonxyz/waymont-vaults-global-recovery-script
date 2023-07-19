@@ -73,7 +73,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const refundReceiver = "0x0000000000000000000000000000000000000000";
 
     // Sign params for Safe.execTransaction
-    const nonce = mySafeContract.nonce();
+    const nonce = await mySafeContract.nonce();
 
     const encodedData = ethers.utils.defaultAbiCoder.encode(
         ['bytes32', 'address', 'uint256', 'bytes32', 'uint8', 'uint256', 'uint256', 'uint256', 'address', 'address', 'uint256'],
