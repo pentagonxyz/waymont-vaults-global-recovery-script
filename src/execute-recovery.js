@@ -173,6 +173,9 @@ const myChildSigningKey = myChildWallet._signingKey();
             // Dispatch TX
             let tx = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianWithoutPolicyGuardian(mySafeContract.address, packedOverlyingSignatures);
             console.log("Submitted WaymontSafePolicyGuardianSigner.disablePolicyGuardianWithoutPolicyGuardian with transaction hash:", tx.hash);
+            console.log("Waiting for confirmations...");
+            await tx.wait();
+            console.log("Transaction confirmed!", tx.hash);
         }
     }
 
@@ -396,4 +399,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     // Dispatch TX
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, packedOverlyingSignatures);
     console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
+    console.log("Waiting for confirmations...");
+    await tx.wait();
+    console.log("Transaction confirmed!", tx.hash);
 })();

@@ -216,6 +216,9 @@ describe("Policy guardian recovery script", function () {
                 // Dispatch TX
                 const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
                 console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
+                console.log("Waiting for confirmations...");
+                await tx.wait();
+                console.log("Transaction confirmed!", tx.hash);
 
                 // Assert signers on AdvancedSigner are correct
                 const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
