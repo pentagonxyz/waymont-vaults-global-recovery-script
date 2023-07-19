@@ -123,41 +123,51 @@ const myChildSigningKey = myChildWallet._signingKey();
                 ]
             );
 
-            // Generate overlying WaymontSafeAdvancedSigner signature
-            const advancedSignerOverlyingSignaturePointer = ethers.utils.solidityPack(
-                ["bytes32", "uint256", "uint8"],
-                [
-                    ethers.utils.hexZeroPad(myWaymontSafeAdvancedSignerContract.address, 32),
-                    (65 * 2) + 32 + 65,
-                    0
-                ]
-            );
-            const advancedSignerOverlyingSignatureData = ethers.utils.solidityPack(
-                ["uint256", "bytes"],
-                [
-                    65 * 2,
-                    userSignature
-                ]
-            );
-
             // Pack all overlying signatures in correct order
             let packedOverlyingSignatures;
 
             if (myWaymontSafeAdvancedSignerContract === undefined) {
-                packedOverlyingSignatures = ethers.utils.solidityPack(
-                    ["bytes", "bytes", "bytes"],
-                    [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
-                );
-            } else if (myWaymontSafeAdvancedSignerContract.address.toLowerCase() > waymontSafePolicyGuardianSignerContract.address.toLowerCase()) {
-                packedOverlyingSignatures = ethers.utils.solidityPack(
-                    ["bytes", "bytes", "bytes", "bytes"],
-                    [policyGuardianOverlyingSignaturePointer, advancedSignerOverlyingSignaturePointer, policyGuardianOverlyingSignatureData, advancedSignerOverlyingSignatureData]
-                );
+                if (myChildWallet.address.toLowerCase() > waymontSafePolicyGuardianSignerContract.address.toLowerCase()) {
+                    packedOverlyingSignatures = ethers.utils.solidityPack(
+                        ["bytes", "bytes", "bytes"],
+                        [policyGuardianOverlyingSignaturePointer, userSignature, policyGuardianOverlyingSignatureData]
+                    );
+                } else {
+                    packedOverlyingSignatures = ethers.utils.solidityPack(
+                        ["bytes", "bytes", "bytes"],
+                        [userSignature, policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData]
+                    );
+                }
             } else {
-                packedOverlyingSignatures = ethers.utils.solidityPack(
-                    ["bytes", "bytes", "bytes", "bytes"],
-                    [advancedSignerOverlyingSignaturePointer, policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData, advancedSignerOverlyingSignatureData]
+                // Generate overlying WaymontSafeAdvancedSigner signature
+                const advancedSignerOverlyingSignaturePointer = ethers.utils.solidityPack(
+                    ["bytes32", "uint256", "uint8"],
+                    [
+                        ethers.utils.hexZeroPad(myWaymontSafeAdvancedSignerContract.address, 32),
+                        (65 * 2) + 32 + 65,
+                        0
+                    ]
                 );
+                const advancedSignerOverlyingSignatureData = ethers.utils.solidityPack(
+                    ["uint256", "bytes"],
+                    [
+                        65 * 2,
+                        userSignature
+                    ]
+                );
+
+                // Pack all overlying signatures in correct order
+                if (myWaymontSafeAdvancedSignerContract.address.toLowerCase() > waymontSafePolicyGuardianSignerContract.address.toLowerCase()) {
+                    packedOverlyingSignatures = ethers.utils.solidityPack(
+                        ["bytes", "bytes", "bytes", "bytes"],
+                        [policyGuardianOverlyingSignaturePointer, advancedSignerOverlyingSignaturePointer, policyGuardianOverlyingSignatureData, advancedSignerOverlyingSignatureData]
+                    );
+                } else {
+                    packedOverlyingSignatures = ethers.utils.solidityPack(
+                        ["bytes", "bytes", "bytes", "bytes"],
+                        [advancedSignerOverlyingSignaturePointer, policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData, advancedSignerOverlyingSignatureData]
+                    );
+                }
             }
 
             // Dispatch TX
