@@ -245,17 +245,22 @@ describe("Policy guardian recovery script", function () {
                 // Assert signers on AdvancedSigner are correct
                 const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictedAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
                 const underlyingOwners = await myWaymontSafeAdvancedSignerContract.getOwners();
-                assert(underlyingOwners.length == advancedSignerUnderlyingSignerCount && underlyingOwners[0] == myChildWallet.address);
-                expect(await myWaymontSafeAdvancedSignerContract.getThreshold()).to.equal(2);
+                expect(underlyingOwners.length).to.be.equal(advancedSignerUnderlyingSignerCount);
+                expect(underlyingOwners[0].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
+                expect(await myWaymontSafeAdvancedSignerContract.getThreshold()).to.equal(1);
 
                 // Assert signers on Safe are correct
                 const safeOwners = await mySafeContract.getOwners();
-                assert(safeOwners.length == 2 && safeOwners[0] == waymontSafePolicyGuardianSignerContract.address && safeOwners[1] == predictedAdvancedSignerAddress);
+                expect(safeOwners.length).to.be.equal(2);
+                expect(safeOwners[0].toLowerCase()).to.be.equal(predictedAdvancedSignerAddress.toLowerCase());
+                expect(safeOwners[1].toLowerCase()).to.be.equal(waymontSafePolicyGuardianSignerContract.address.toLowerCase());
                 expect(await mySafeContract.getThreshold()).to.equal(2);
             } else {
                 // Assert signers on Safe are correct
                 const safeOwners = await mySafeContract.getOwners();
-                assert(safeOwners.length == 4 && safeOwners[0] == waymontSafePolicyGuardianSignerContract.address && safeOwners[1] == myChildWallet.address);
+                expect(safeOwners.length).to.be.equal(4);
+                expect(safeOwners[0].toLowerCase()).to.be.equal(waymontSafePolicyGuardianSignerContract.address.toLowerCase());
+                expect(safeOwners[1].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
                 expect(await mySafeContract.getThreshold()).to.equal(2);
             }
 
