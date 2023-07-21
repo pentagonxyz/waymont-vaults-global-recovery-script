@@ -62,7 +62,7 @@ const myChildSigningKey = myChildWallet._signingKey();
         const myWaymontSafeAdvancedSignerAddress = safeOwners[0].toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase() ? safeOwners[1] : safeOwners[0];
 
         if ((await myProvider.getCode(myWaymontSafeAdvancedSignerAddress)) !== "0x") {
-            myWaymontSafeAdvancedSignerContract = new ethers.Contract(myWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI);
+            myWaymontSafeAdvancedSignerContract = new ethers.Contract(myWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, myProvider);
             let error, threshold;
 
             try {
@@ -126,7 +126,7 @@ const myChildSigningKey = myChildWallet._signingKey();
                 0
             ]
         );
-        const advancedSignerOverlyingSignatureData = abi.encodePacked(
+        const advancedSignerOverlyingSignatureData = ethers.utils.defaultAbiCoder.encode(
             ["uint256", "bytes"],
             [
                 65,
