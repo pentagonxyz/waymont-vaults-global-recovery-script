@@ -55,7 +55,6 @@ function runAndWait(script, args) {
 const myNode = ethers.utils.HDNode.fromMnemonic(EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE);
 const myChild = myNode.derivePath(HD_PATH + "/" + EXAMPLE_VAULT_SUBKEY_INDEX);
 const myChildWallet = new ethers.Wallet(myChild.privateKey);
-const myChildSigningKey = myChildWallet._signingKey();
 
 // Address prediction functions
 function predictWaymontSafeAdvancedSignerAddress(predictedSafeAddress, signers, threshold, deploymentNonce) {
@@ -101,7 +100,7 @@ function predictSafeAddress(initializerData, saltNonce) {
 describe("Policy guardian recovery script", function () {
     it("Scripts should recover the Safe from the policy guardian", async function () {
         // Get signers
-        const [relayer, policyGuardian] = await ethers.getSigners();
+        const [relayer] = await ethers.getSigners();
 
         // Deploy Safe singleton factory
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_DEPLOYER_ADDRESS, value: "1000000000000000000" });
@@ -122,6 +121,7 @@ describe("Policy guardian recovery script", function () {
         const waymontSafePolicyGuardianSignerContract = new ethers.Contract(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI, relayer);
         await relayer.sendTransaction({ to: WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS, value: "1000000000000000000" });
         const impersonatedPolicyGuardianManager = await ethers.getImpersonatedSigner(WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS);
+        const policyGuardian = ethers.Wallet.createRandom();
         await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).setPolicyGuardian(policyGuardian.address);
 
         // Test on Safe with policy guardian and 3 EOA signers; also test on Safe with policy guardian and advanced signer (with 1 underlying signer, 2 underlying signers, and 3 underlying signers)
@@ -213,19 +213,37 @@ describe("Policy guardian recovery script", function () {
                 );
 
                 const overlyingHash = ethers.utils.keccak256(encodedTransactionData);
-                const userSignatureUnserialized = myChildSigningKey.signDigest(overlyingHash);
-                const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
+                const policyGuardianSignatureUnserialized = policyGuardian._signingKey().signDigest(overlyingHash);
+                const policyGuardianSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [policyGuardianSignatureUnserialized.r, policyGuardianSignatureUnserialized.s, policyGuardianSignatureUnserialized.v]);
+
+                // Generate overlying policy guardian smart contract signature
+                const policyGuardianOverlyingSignaturePointer = ethers.utils.solidityPack(
+                    ["bytes32", "uint256", "uint8"],
+                    [
+                        ethers.utils.hexZeroPad(WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS, 32),
+                        65,
+                        0
+                    ]
+                );
+                const policyGuardianOverlyingSignatureData = ethers.utils.solidityPack(
+                    ["uint256", "bytes"],
+                    [
+                        65,
+                        policyGuardianSignature
+                    ]
+                );
+                const packedOverlyingSignature = ethers.utils.solidityPack(["bytes", "bytes"], [policyGuardianOverlyingSignaturePointer, policyGuardianOverlyingSignatureData]);
             
                 // Dispatch TX
-                console.log("Submitting Safe.execTransaction...");
-                const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
+                console.log("Submitting Safe.execTransaction (in test.js)...");
+                const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, packedOverlyingSignature);
                 console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
                 console.log("Waiting for confirmations...");
                 await tx.wait();
                 console.log("Transaction confirmed!", tx.hash);
 
                 // Assert signers on AdvancedSigner are correct
-                const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
+                const myWaymontSafeAdvancedSignerContract = new ethers.Contract(predictedAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI, relayer);
                 const underlyingOwners = await myWaymontSafeAdvancedSignerContract.getOwners();
                 assert(underlyingOwners.length == advancedSignerUnderlyingSignerCount && underlyingOwners[0] == myChildWallet.address);
                 expect(await myWaymontSafeAdvancedSignerContract.getThreshold()).to.equal(2);
