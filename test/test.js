@@ -7,7 +7,7 @@ const crypto = require("crypto");
 
 const WAYMONT_SAFE_FACTORY_ABI = require("./abi/WaymontSafeFactory.json");
 const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI = require("../src/abi/WaymontSafePolicyGuardianSigner.json");
-const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("../src/abi/WaymontSafePolicyGuardianSigner.json");
+const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("../src/abi/WaymontSafeAdvancedSigner.json");
 const SAFE_ABI = require("../src/abi/Safe.json");
 const MULTI_SEND_ABI = require("../src/abi/MultiSend.json");
 const SAFE_PROXY_FACTORY_ABI = require("./abi/SafeProxyFactory.json");
