@@ -41,7 +41,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     // Ensure Safe has signer as an owner
     let userSignerFoundOnSafe = false;
     for (const owner of safeOwners) if (owner.toLowerCase() === myChildWallet.address.toLowerCase()) userSignerFoundOnSafe = true;
-    assert(policyGuardianSignerContractFoundOnSafe, "Signing key not found as a root-level signer on this Safe. Maybe this safe has not yet been recovered?");
+    assert(userSignerFoundOnSafe, "Signing key not found as a root-level signer on this Safe. Maybe this safe has not yet been recovered?");
 
     // Generate transactions to send
     let transactions = [];
@@ -93,6 +93,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
 
     // Dispatch TX
+    console.log("Submitting Safe.execTransaction... (in execute-safe-transactions.js)");
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
     console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
     console.log("Waiting for confirmations...");

@@ -149,6 +149,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     }
 
     // Dispatch TX
+    console.log("Submitting WaymontSafePolicyGuardianSigner.queueDisablePolicyGuardian...");
     let tx = await waymontSafePolicyGuardianSignerContract.queueDisablePolicyGuardian(mySafeContract.address, packedOverlyingSignaturesForQueueing);
     console.log("Submitted WaymontSafePolicyGuardianSigner.queueDisablePolicyGuardian with transaction hash:", tx.hash);
     console.log("Waiting for confirmations...");

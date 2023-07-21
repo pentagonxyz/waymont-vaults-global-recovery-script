@@ -148,7 +148,7 @@ describe("Policy guardian recovery script", function () {
                 "0",
                 "0x0000000000000000000000000000000000000000"
             ]);
-            const safeSaltNonce = 0;
+            const safeSaltNonce = advancedSignerUnderlyingSignerCount; // Use advancedSignerUnderlyingSignerCount as safeSaltNonce so deployments don't overlap
             const safeProxyFactory = new ethers.Contract(SAFE_PROXY_FACTORY_ADDRESS, SAFE_PROXY_FACTORY_ABI, relayer);
             await safeProxyFactory.createProxyWithNonce(SAFE_SINGLETON_ADDRESS, safeInitializerData, safeSaltNonce);
             const safeAddress = predictSafeAddress(safeInitializerData, safeSaltNonce);
@@ -214,6 +214,7 @@ describe("Policy guardian recovery script", function () {
                 const userSignature = ethers.utils.solidityPack(["bytes32", "bytes32", "uint8"], [userSignatureUnserialized.r, userSignatureUnserialized.s, userSignatureUnserialized.v]);
             
                 // Dispatch TX
+                console.log("Submitting Safe.execTransaction...");
                 const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, userSignature);
                 console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
                 console.log("Waiting for confirmations...");
@@ -262,7 +263,7 @@ describe("Policy guardian recovery script", function () {
             await ethers.provider.send("evm_mine");
         
             // Expect failure running script: execute-recovery.js
-            assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
+            await assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
                 providerUrl.href,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
@@ -273,7 +274,7 @@ describe("Policy guardian recovery script", function () {
             // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
             await ethers.provider.send("evm_increaseTime", [60]);
             await ethers.provider.send("evm_mine");
-        
+
             // Run script: execute-recovery.js
             await runAndWait(__dirname + "/../src/execute-recovery.js", [
                 providerUrl.href,
@@ -282,7 +283,7 @@ describe("Policy guardian recovery script", function () {
                 relayer2._signingKey().privateKey,
                 EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
             ]);
-        
+
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
             assert(safeOwners.length == advancedSignerUnderlyingSignerCount > 0 ? advancedSignerUnderlyingSignerCount : 3 && safeOwners[0] == myChildWallet.address);
@@ -293,7 +294,6 @@ describe("Policy guardian recovery script", function () {
             const storageContract = await storageContractFactory.deploy();
             const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
-        
             // Run script: execute-safe-transactions.js
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
                 providerUrl.href,

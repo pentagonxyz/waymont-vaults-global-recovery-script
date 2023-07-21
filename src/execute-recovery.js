@@ -38,7 +38,8 @@ const myChildSigningKey = myChildWallet._signingKey();
 (async function() {
     // Ensure Safe threshold == 2
     const safeOwners = await mySafeContract.getOwners();
-    assert(await mySafeContract.getThreshold() == 2, "Expected Safe threshold to be 2 but threshold is less than 2. Maybe this Safe has already been recovered?");
+    assert(await mySafeContract.getThreshold() >= 2, "Expected Safe threshold to be 2 but threshold is less than 2. Maybe this Safe has already been recovered?");
+    assert(await mySafeContract.getThreshold() == 2, "Expected Safe threshold to be 2 but threshold is greater than 2.");
 
     // Ensure Safe has WaymontSafePolicyGuardianSigner as an owner
     let policyGuardianSignerContractFoundOnSafe = false;
@@ -171,6 +172,7 @@ const myChildSigningKey = myChildWallet._signingKey();
             }
 
             // Dispatch TX
+            console.log("Submitting WaymontSafePolicyGuardianSigner.disablePolicyGuardianWithoutPolicyGuardian...");
             let tx = await waymontSafePolicyGuardianSignerContract.disablePolicyGuardianWithoutPolicyGuardian(mySafeContract.address, packedOverlyingSignatures);
             console.log("Submitted WaymontSafePolicyGuardianSigner.disablePolicyGuardianWithoutPolicyGuardian with transaction hash:", tx.hash);
             console.log("Waiting for confirmations...");
@@ -293,7 +295,7 @@ const myChildSigningKey = myChildWallet._signingKey();
             }
         ];
     }
-        
+
     // Encode MultiSend.multiSend function data
     const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_ABI);
 
@@ -397,6 +399,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     }
 
     // Dispatch TX
+    console.log("Submitting Safe.execTransaction (in execute-recovery.js)...");
     const tx = await mySafeContract.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, packedOverlyingSignatures);
     console.log("Submitted Safe.execTransaction with transaction hash:", tx.hash);
     console.log("Waiting for confirmations...");
