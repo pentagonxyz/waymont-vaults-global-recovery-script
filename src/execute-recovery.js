@@ -7,7 +7,7 @@ const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_ABI = require("./abi/WaymontSafePolicy
 const WAYMONT_SAFE_ADVANCED_SIGNER_ABI = require("./abi/WaymontSafeAdvancedSigner.json");
 const MULTI_SEND_ABI = require("./abi/MultiSend.json");
 
-// Constant addresses and typehashes
+// Constant addresses, typehashes, etc.
 const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS = "0x5B34e701393b197d267e6619d01711121F3e87Ce";
 const MULTI_SEND_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
 const DISABLE_POLICY_GUARDIAN_TYPEHASH = "0x1fa738809572ae202e6e8b28ae7d08f5972c3ae85e70f8bc386515bb47925975";
@@ -300,7 +300,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_ABI);
 
     let packedTransactions = "0x";
-    for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, 0, tx.data.length, tx.data]).substring(2);
+    for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, 0, ethers.utils.hexDataLength(tx.data), tx.data]).substring(2);
 
     let data = multiSendInterface.encodeFunctionData("multiSend", [packedTransactions]);
 

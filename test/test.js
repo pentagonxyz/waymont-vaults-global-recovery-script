@@ -33,6 +33,9 @@ const WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS = "0x5B34e701393b197d
 const WAYMONT_SAFE_ADVANCED_SIGNER_IMPLEMENTATION_ADDRESS = "0x1987Af72Db975d7909F5b9444ad9aEeADd3850F1";
 const WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS = "0x67161d9ad1478ae44b35d24985f2d7c4cb88f61a";
 
+const DOMAIN_SEPARATOR_TYPEHASH = "0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218";
+const SAFE_TX_TYPEHASH = "0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8";
+
 const EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE = "shove modify pet author control topic today opera okay payment diary provide";
 const EXAMPLE_VAULT_SUBKEY_INDEX = 12345678;
 const HD_PATH = "m/44/60/0/0";
@@ -65,7 +68,7 @@ function predictWaymontSafeAdvancedSignerAddress(predictedSafeAddress, signers, 
         [
             "0x3d602d80600a3d3981f3363d3d373d3d3d363d73",
             WAYMONT_SAFE_ADVANCED_SIGNER_IMPLEMENTATION_ADDRESS,
-            "5af43d82803e903d91602b57fd5bf3"
+            "0x5af43d82803e903d91602b57fd5bf3"
         ]
     ));
     const waymontSafeAdvancedSignerAddress = ethers.utils.keccak256(ethers.utils.solidityPack(
@@ -125,7 +128,7 @@ describe("Policy guardian recovery script", function () {
         const safeInterface = new ethers.utils.Interface(SAFE_ABI);
         const extraSigners = [ethers.Wallet.createRandom().address, ethers.Wallet.createRandom().address];
 
-        for (const advancedSignerUnderlyingSignerCount = 0; advancedSignerUnderlyingSignerCount <= 3; advancedSignerUnderlyingSignerCount++) {
+        for (let advancedSignerUnderlyingSignerCount = 0; advancedSignerUnderlyingSignerCount <= 3; advancedSignerUnderlyingSignerCount++) {
             // Safe init params
             const initialOverlyingSigners = advancedSignerUnderlyingSignerCount > 0 ? [
                 waymontSafePolicyGuardianSignerContract.address
@@ -166,8 +169,8 @@ describe("Policy guardian recovery script", function () {
                 // Generate transactions to send
                 const transactions = [
                     {
-                        to: safe.address,
-                        data: safe.interface.encodeFunctionData("addOwnerWithThreshold", [predictedAdvancedSignerAddress, 2])
+                        to: mySafeContract.address,
+                        data: mySafeContract.interface.encodeFunctionData("addOwnerWithThreshold", [predictedAdvancedSignerAddress, 2])
                     },
                     {
                         to: waymontSafeFactoryContract.address,
@@ -179,7 +182,7 @@ describe("Policy guardian recovery script", function () {
                 const multiSendInterface = new ethers.utils.Interface(MULTI_SEND_ABI);
 
                 let packedTransactions = "0x";
-                for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, 0, tx.data.length, tx.data]).substring(2);
+                for (const tx of transactions) packedTransactions += ethers.utils.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"], [0, tx.to, 0, ethers.utils.hexDataLength(tx.data), tx.data]).substring(2);
 
                 let data = multiSendInterface.encodeFunctionData("multiSend", [packedTransactions]);
 
@@ -202,7 +205,7 @@ describe("Policy guardian recovery script", function () {
                 );
 
                 const safeTxHash = ethers.utils.keccak256(encodedData);
-                const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, myProvider.network.chainId, mySafeContract.address]));
+                const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, ethers.provider.network.chainId, mySafeContract.address]));
 
                 const encodedTransactionData = ethers.utils.solidityPack(
                     ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
@@ -294,6 +297,9 @@ describe("Policy guardian recovery script", function () {
             const storageContract = await storageContractFactory.deploy();
             const exampleCall1Data = storageContract.interface.encodeFunctionData("store", [5678]);
 
+            // Send ETH to Safe
+            await relayer.sendTransaction({ to: safeAddress, value: "1234" });
+
             // Run script: execute-safe-transactions.js
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
                 providerUrl.href,
@@ -311,7 +317,7 @@ describe("Policy guardian recovery script", function () {
         
             // Assertions
             expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
-            expect(await provider.getBalance("0x0000000000000000000000000000000000002222")).to.equal(1234);
+            expect(await ethers.provider.getBalance("0x0000000000000000000000000000000000002222")).to.equal(1234);
         }
     });
 });
