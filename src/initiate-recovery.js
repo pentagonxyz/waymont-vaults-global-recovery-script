@@ -59,7 +59,7 @@ const myChildSigningKey = myChildWallet._signingKey();
     let myWaymontSafeAdvancedSignerContract;
 
     if (safeOwners.length == 2) {
-        const myWaymontSafeAdvancedSignerAddress = safeOwners[0].toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase() ? safeOwners[1] : safeOwners[2];
+        const myWaymontSafeAdvancedSignerAddress = safeOwners[0].toLowerCase() === WAYMONT_SAFE_POLICY_GUARDIAN_SIGNER_CONTRACT_ADDRESS.toLowerCase() ? safeOwners[1] : safeOwners[0];
 
         if ((await myProvider.getCode(myWaymontSafeAdvancedSignerAddress)) !== "0x") {
             myWaymontSafeAdvancedSignerContract = new ethers.Contract(myWaymontSafeAdvancedSignerAddress, WAYMONT_SAFE_ADVANCED_SIGNER_ABI);
