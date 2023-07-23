@@ -1,3 +1,4 @@
+#!/bin/sh
 START_TIMESTAMP=$(date +%s)
 node node_modules/.bin/hardhat node > node.log &
 HARDHAT_NODE_PID=$!
