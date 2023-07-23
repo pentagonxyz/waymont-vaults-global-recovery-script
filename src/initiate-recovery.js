@@ -126,7 +126,7 @@ const myChildSigningKey = myChildWallet._signingKey();
                 0
             ]
         );
-        const advancedSignerOverlyingSignatureData = ethers.utils.defaultAbiCoder.encode(
+        const advancedSignerOverlyingSignatureData = ethers.utils.solidityPack(
             ["uint256", "bytes"],
             [
                 65,
