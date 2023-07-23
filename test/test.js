@@ -161,7 +161,7 @@ describe("Policy guardian recovery script", function () {
             if (advancedSignerUnderlyingSignerCount > 0) {
                 // Generate predictedAdvancedSignerAddress
                 let underlyingSigners = [myChildWallet.address];
-                for (const i = 1; i < advancedSignerUnderlyingSignerCount; i++) underlyingSigners.push(extraSigners[i - 1]);
+                for (let i = 1; i < advancedSignerUnderlyingSignerCount; i++) underlyingSigners.push(extraSigners[i - 1]);
                 const underlyingThreshold = 1;
                 const advancedSignerDeploymentNonce = "0x" + crypto.randomBytes(32).toString('hex');
                 const predictedAdvancedSignerAddress = predictWaymontSafeAdvancedSignerAddress(safeAddress, underlyingSigners, underlyingThreshold, advancedSignerDeploymentNonce);
@@ -324,6 +324,7 @@ describe("Policy guardian recovery script", function () {
             await relayer.sendTransaction({ to: safeAddress, value: "1234" });
 
             // Run script: execute-safe-transactions.js
+            const dummyEthBalanceBefore = await ethers.provider.getBalance("0x0000000000000000000000000000000000002222");
             await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
                 providerUrl.href,
                 safeAddress,
@@ -340,7 +341,8 @@ describe("Policy guardian recovery script", function () {
         
             // Assertions
             expect(await storageContract.retrieve(safeAddress)).to.equal(5678);
-            expect(await ethers.provider.getBalance("0x0000000000000000000000000000000000002222")).to.equal(1234);
+            const dummyEthBalanceAfter = await ethers.provider.getBalance("0x0000000000000000000000000000000000002222");
+            expect(dummyEthBalanceAfter.sub(dummyEthBalanceBefore)).to.equal(1234);
         }
     });
 });
