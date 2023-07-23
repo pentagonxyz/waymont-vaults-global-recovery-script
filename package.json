@@ -10,7 +10,7 @@
     "initiate-recovery": "node src/initiate-recovery.js",
     "execute-recovery": "node src/execute-recovery.js",
     "execute-safe-transactions": "node src/execute-safe-transactions.js",
-    "test": "npx hardhat test"
+    "test": "bash test/test.sh"
   },
   "repository": {
     "type": "git",
