@@ -312,7 +312,8 @@ describe("Policy guardian recovery script", function () {
 
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
-            assert(safeOwners.length == advancedSignerUnderlyingSignerCount > 0 ? advancedSignerUnderlyingSignerCount : 3 && safeOwners[0] == myChildWallet.address);
+            expect(safeOwners.length).to.be.equal(advancedSignerUnderlyingSignerCount > 0 ? advancedSignerUnderlyingSignerCount : 3);
+            expect(safeOwners[0].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
             for (const i = 1; i < advancedSignerUnderlyingSignerCount; i++) assert(safeOwners[i] == extraSigners[i - 1]);
         
             // Deploy dummy storage contract and get calldata to store value
