@@ -312,10 +312,16 @@ describe("Policy guardian recovery script", function () {
 
             // Assert policy guardian signer no longer present and rest of signers are correct
             const safeOwners = await mySafeContract.getOwners();
-            expect(safeOwners.length).to.be.equal(advancedSignerUnderlyingSignerCount > 0 ? advancedSignerUnderlyingSignerCount : 3);
-            expect(safeOwners[advancedSignerUnderlyingSignerCount > 0 ? safeOwners.length - 1 : 0].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
-            for (let i = 1; i < advancedSignerUnderlyingSignerCount; i++) expect(safeOwners[safeOwners.length - 1 - i].toLowerCase()).to.be.equal(extraSigners[i - 1].toLowerCase());
-        
+
+            if (advancedSignerUnderlyingSignerCount > 0) {
+                expect(safeOwners.length).to.be.equal(advancedSignerUnderlyingSignerCount);
+                expect(safeOwners[safeOwners.length - 1].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
+                for (let i = 1; i < advancedSignerUnderlyingSignerCount; i++) expect(safeOwners[safeOwners.length - 1 - i].toLowerCase()).to.be.equal(extraSigners[i - 1].toLowerCase());
+            } else {
+                expect(safeOwners.length).to.be.equal(3);
+                expect(safeOwners[0].toLowerCase()).to.be.equal(myChildWallet.address.toLowerCase());
+            }
+
             // Deploy dummy storage contract and get calldata to store value
             const storageContractFactory = new ethers.ContractFactory(STORAGE_ABI, STORAGE_BYTECODE, relayer);
             const storageContract = await storageContractFactory.deploy();
