@@ -9,11 +9,11 @@ Recovery script for use in the event that Waymont's transaction policy guardian 
 First, export your 12-word mnemonic seed phrase (root private key) and your vault subkey indexes from your Waymont mobile signer app:
 
 1. Open the Waymont mobile app on your mobile app.
-2. Hit the settings button.
-3. Hit "Export Private Key" to export your root private key (seed phrase).
+2. Hit the user settings button (user icon) in the upper-left corner of the app.
+3. Hit "Export Private Key" (in red text under "Actions") to export your root private key (seed phrase).
 4. Confirm that you are aware of the security implications of exporting your root private key.
 5. Authenticate using biometrics.
-6. The app will display your unencrypted root private key in the form of a 12-word mneumonic seed phrase.
+6. Click "Show Key," and the app will display your unencrypted root private key in the form of a 12-word mneumonic seed phrase.
     - **WARNING: Do NOT attempt to transmit this sensitive private key to your computer electronically--simply MANUALLY type it directly into the recovery script (described below) on your computer.**
 7. Take note our your vault subkey indexes as well.
     - While they do not need to be private, these are necessary to recover your vaults using this script (as they provide the paths to derive the keys for each vault from your root key).
