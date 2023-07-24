@@ -1,0 +1,31 @@
+{
+  "name": "waymont-vaults-global-recovery-script",
+  "version": "1.0.0",
+  "description": "Recover Waymont Safes from the policy guardian.",
+  "main": "src/initiate-recovery.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "initiate-recovery": "node src/initiate-recovery.js",
+    "execute-recovery": "node src/execute-recovery.js",
+    "execute-safe-transactions": "node src/execute-safe-transactions.js",
+    "test": "bash test/test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pentagonxyz/waymont-vaults-global-recovery-script.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/pentagonxyz/waymont-vaults-global-recovery-script/issues"
+  },
+  "homepage": "https://github.com/pentagonxyz/waymont-vaults-global-recovery-script#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2"
+  }
+}
