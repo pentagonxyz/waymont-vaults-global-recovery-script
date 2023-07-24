@@ -32,7 +32,7 @@ On your computer, for each Waymont vault address you would like to export:
 
 #### Identify Vault Subkey Index
 
-Using the list of vault subkey index found in or exported from the Waymont mobile signer app ([as described above](#export-private-key)), identify the vault subkey index corresponding to the Waymont vault address you are looking to recover.
+Using the list of vault subkey indexes found in or exported from the Waymont mobile signer app ([as described above](#export-private-key)), identify the vault subkey index corresponding to the Waymont vault address you are looking to recover.
 
 #### Initiate Vault Recovery if Necessary
 
