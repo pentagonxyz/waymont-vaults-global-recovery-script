@@ -72,3 +72,28 @@ npm run execute-safe-transactions http://localhost:8545 0xYOURVAULTSAFECONTRACTA
 
 - Replace `0xEXAMPLECALL1TARGET 0xEXAMPLECALL1DATA EXAMPLECALL1VALUE 0xEXAMPLECALL2TARGET 0xEXAMPLECALL2DATA EXAMPLECALL2VALUE` with the following values, all separated by spaces: for each transaction you want to send, enter the target address, data to be sent to the target, and ETH value to be sent to the target.
     - If you are simply trying to send ETH to a target without any contract function call data, just use "0x" for the data parameter.
+
+##### Using Rabby to Get Function Call Data
+
+Rabby's watch-only addresses feature can make the process of getting the function call data you need to use your recovered Safe easier:
+
+1. Download Rabby from the Chrome Web Store at the following link: [https://chrome.google.com/webstore/detail/rabby-wallet/acmacodkjbdgmoleebolmdjonilkdbch](https://chrome.google.com/webstore/detail/rabby-wallet/acmacodkjbdgmoleebolmdjonilkdbch)
+2. If opening Rabby for the first time, click "Next" on the first screen and then "Get Started" on the next screen.
+    ![If opening Rabby for the first time, click "Next" on the first screen and then "Get Started" on the next screen.](docs/rabby-onboarding.png)
+3. On the "Add an Address" screen, click "Add Contacts" at the bottom.
+    ![On the "Add an Address" screen, click "Add Contacts" at the bottom.](docs/rabby-add-address.png)
+4. On the "Set Password" screen, set a password. Note that you will not be protecting any private keys with this password in this tutorial--only your Safe address.
+    ![On the "Set Password" screen, set a password.](docs/rabby-set-password.png)
+5. On the "Add Contacts" screen, enter your recovered Waymont Safe address and click "Confirm."
+    ![On the "Add Contacts" screen, enter your recovered Waymont Safe address and click "Confirm."](docs/rabby-add-contacts.png)
+6. On the "Imported Successfully" screen, enter a name (if you would like) and click "Done."
+    ![On the "Imported Successfully" screen, enter a name (if you would like) and click "Done."](docs/rabby-imported-successfully.png)
+7. You should now be able to simulate transactions from your Safe via Rabby (in order to get the function call data you need). Use Rabby just like you would MetaMask (choose to connect to MetaMask in dApps to get them to connect to Rabby and use the dApp to initate transactions).
+    - For normal transactions (as opposed to approvals), to get the destination address of a simulated transaction, simply hover over the address listed to the right of "Interact contract" and click the copy button that appears on hover. As an example, the screenshot below shows a transaction simulation of swapping ETH via Uniswap (generated from the Uniswap dApp).
+        ![As an example, this screenshot shows a transaction simulation of swapping ETH via Uniswap (generated from the Uniswap dApp).](docs/rabby-tx-swap.png)
+    - On the other hand, for approval transactions (an example of which you can see in the first screenshot below), the destination address cannot be found on the first screen--instead, you will have to click "View raw" and (as shown in the second screenshot below) copy the address listed in quotes to the right of `"to":` at the bottom of the JSON code block to find it.
+        ![As another example, the screenshot below shows a transaction simulation of approving tokens to Uniswap (generated from the Uniswap dApp).](docs/rabby-tx-approve.png)
+        ![This screenshot shows what your screen should look like after clicking "View raw."](docs/rabby-tx-raw-data.png)
+    - To get the function call data for either a normal transaction or an approval transaction, click "View Raw" in the upper-right corner of the transaction simulation and then click on the "HEX" tab to copy the transaction function call data. The screenshots below show the results both of these steps in order:
+        ![This screenshot shows what your screen should look like after clicking "View raw."](docs/rabby-tx-raw-data.png)
+        ![This screenshot shows what your screen should look like after clicking "HEX."](docs/rabby-tx-raw-hex.png)
