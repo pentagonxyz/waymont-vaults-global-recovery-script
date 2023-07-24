@@ -15,7 +15,7 @@ First, export your 12-word mnemonic seed phrase (root private key) and your vaul
 5. Authenticate using biometrics.
 6. Click "Show Key," and the app will display your unencrypted root private key in the form of a 12-word mneumonic seed phrase.
     - **WARNING: Do NOT attempt to transmit this sensitive private key to your computer electronically--simply MANUALLY type it directly into the recovery script (described below) on your computer.**
-7. Take note our your vault subkey indexes as well.
+7. Take note of your vault subkey indexes as well.
     - While they do not need to be private, these are necessary to recover your vaults using this script (as they provide the paths to derive the keys for each vault from your root key).
 
 *As with many other self-custody providers, your 12-word mnemonic seed phrase is the root private key of a HD (hierarchical deterministic) tree of signers for each Waymont vault you own or are a guardian on. However, Waymont does not ask users to manually back it up as it should only be needed in the case of emergency recovery from the policy guardian as described in this document.*
@@ -46,6 +46,12 @@ cd waymont-vaults-global-recovery-script
 npm run initiate-recovery http://localhost:8545 0xYOURWALLETCONTRACTADDRESSHERE YOURVAULTSUBKEYINDEX 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here"
 ```
 
+- Replace `http://localhost:8545` with your Web3 provider's JSON-RPC API endpoint URL--for example: `https://mainnet.infura.io/v3/YOUR-API-KEY`.
+- Replace `0xYOURVAULTSAFECONTRACTADDRESSHERE` with your Waymont vault (`Safe` smart contract) address.
+- Replace `YOURVAULTSUBKEYINDEX` with the vault subkey index integer you found [in the steps above](#export-private-key).
+- Replace `0xFUNDEDPRIVATEKEYFORGAS` with an Ethereum account's private key with enough Ethereum for the gas costs necessary to send the transactions you would like to send.
+- Replace `type your mnemonic phrase here` with your mnemonic seed phrase.
+
 Assuming that the initiation script passed with a transaction hash, you should wait for the 14-day timelock to pass before executing wallet recovery.
 
 #### Execute Vault Recovery
@@ -55,12 +61,6 @@ If necessary, wait for the 14-day timelock to pass; then, run the following comm
 ```
 npm run execute-recovery http://localhost:8545 0xYOURVAULTSAFECONTRACTADDRESSHERE YOURVAULTSUBKEYINDEX 0xFUNDEDPRIVATEKEYFORGAS "type your mnemonic phrase here"
 ```
-
-- Replace `http://localhost:8545` with your Web3 provider's JSON-RPC API endpoint URL--for example: `https://mainnet.infura.io/v3/YOUR-API-KEY`.
-- Replace `0xYOURVAULTSAFECONTRACTADDRESSHERE` with your Waymont vault (`Safe` smart contract) address.
-- Replace `YOURVAULTSUBKEYINDEX` with the vault subkey index integer you found on Etherscan in step 8B.
-- Replace `0xFUNDEDPRIVATEKEYFORGAS` with an Ethereum account's private key with enough Ethereum for the gas costs necessary to send the transactions you would like to send.
-- Replace `type your mnemonic phrase here` with your mnemonic seed phrase.
 
 In the event of failure, the execution script will also tell you how long you have left to wait.
 
