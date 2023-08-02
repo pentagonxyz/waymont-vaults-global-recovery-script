@@ -96,6 +96,10 @@ function predictSafeAddress(initializerData, saltNonce) {
     return "0x" + safeAddress.substring(26);
 }
 
+// Global variables
+let providerUrlHref;
+let chainId;
+
 // Run async code
 describe("Policy guardian recovery script", function () {
     before(async function () {
@@ -112,6 +116,14 @@ describe("Policy guardian recovery script", function () {
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_PROXY_FACTORY_BYTECODE.startsWith("0x") ? SAFE_PROXY_FACTORY_BYTECODE.substring(2) : SAFE_PROXY_FACTORY_BYTECODE) });
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (MULTI_SEND_BYTECODE.startsWith("0x") ? MULTI_SEND_BYTECODE.substring(2) : MULTI_SEND_BYTECODE) });
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.startsWith("0x") ? COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(2) : COMPATIBILITY_FALLBACK_HANDLER_BYTECODE) });
+
+        // Fix provider URL in case it tries to resolve localhost to ::1 (IPv6) instead of 127.0.0.1 (IPv4)
+        const providerUrl = new URL(ethers.provider.connection.url);
+        if (providerUrl.hostname == "localhost") providerUrl.hostname = "127.0.0.1";
+        providerUrlHref = providerUrl.href;
+
+        // Get chain ID
+        chainId = ethers.provider.network.chainId;
     });
 
     let snapshotId;
@@ -231,7 +243,7 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
             );
 
             const safeTxHash = ethers.utils.keccak256(encodedData);
-            const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, ethers.provider.network.chainId, mySafeContract.address]));
+            const domainSeparator = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "address"], [DOMAIN_SEPARATOR_TYPEHASH, chainId, mySafeContract.address]));
 
             const encodedTransactionData = ethers.utils.solidityPack(
                 ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
@@ -294,10 +306,6 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
         const relayer2 = ethers.Wallet.createRandom();
         await relayer.sendTransaction({ to: relayer2.address, value: "1000000000000000000" });
 
-        // Fix provider URL in case it tries to resolve localhost to ::1 (IPv6) instead of 127.0.0.1 (IPv4)
-        const providerUrl = new URL(ethers.provider.connection.url);
-        if (providerUrl.hostname == "localhost") providerUrl.hostname = "127.0.0.1";
-
         // Waymont-initiated recovery or user-initiated recovery?
         if (waymontInitiatedRecovery) {
             if (waymontInitiatedRecoveryPermanently) {
@@ -311,7 +319,7 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
         } else {
             // Run script: initiate-recovery.js
             await runAndWait(__dirname + "/../src/initiate-recovery.js", [
-                providerUrl.href,
+                providerUrlHref,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -327,7 +335,7 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
         
             // Expect failure running script: execute-recovery.js
             await assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
-                providerUrl.href,
+                providerUrlHref,
                 safeAddress,
                 EXAMPLE_VAULT_SUBKEY_INDEX,
                 relayer2._signingKey().privateKey,
@@ -341,7 +349,7 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
 
         // Run script: execute-recovery.js
         await runAndWait(__dirname + "/../src/execute-recovery.js", [
-            providerUrl.href,
+            providerUrlHref,
             safeAddress,
             EXAMPLE_VAULT_SUBKEY_INDEX,
             relayer2._signingKey().privateKey,
@@ -371,7 +379,7 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
         // Run script: execute-safe-transactions.js
         const dummyEthBalanceBefore = await ethers.provider.getBalance("0x0000000000000000000000000000000000002222");
         await runAndWait(__dirname + "/../src/execute-safe-transactions.js", [
-            providerUrl.href,
+            providerUrlHref,
             safeAddress,
             EXAMPLE_VAULT_SUBKEY_INDEX,
             relayer2._signingKey().privateKey,
