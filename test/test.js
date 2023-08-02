@@ -308,14 +308,26 @@ async function recoverSafeFromPolicyGuardian(waymontInitiatedRecovery, waymontIn
 
         // Waymont-initiated recovery or user-initiated recovery?
         if (waymontInitiatedRecovery) {
-            if (waymontInitiatedRecoveryPermanently) {
-                await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).disablePolicyGuardianPermanently();
-                expect(await waymontSafePolicyGuardianSignerContract.policyGuardianPermanentlyDisabled()).to.be.true;
-            } else {
-                await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).disablePolicyGuardianGlobally();
-            }
+            if (advancedSignerUnderlyingSignerCount == 0) {
+                // Expect failure running script: execute-recovery.js
+                await assert.rejects(runAndWait(__dirname + "/../src/execute-recovery.js", [
+                    providerUrlHref,
+                    safeAddress,
+                    EXAMPLE_VAULT_SUBKEY_INDEX,
+                    relayer2._signingKey().privateKey,
+                    EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
+                ]));
 
-            expect(await waymontSafePolicyGuardianSignerContract.policyGuardian()).to.equal("0x0000000000000000000000000000000000000000");
+                // Actually initiate recovery permanently
+                if (waymontInitiatedRecoveryPermanently) {
+                    await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).disablePolicyGuardianPermanently();
+                    expect(await waymontSafePolicyGuardianSignerContract.policyGuardianPermanentlyDisabled()).to.be.true;
+                } else {
+                    await waymontSafePolicyGuardianSignerContract.connect(impersonatedPolicyGuardianManager).disablePolicyGuardianGlobally();
+                }
+
+                expect(await waymontSafePolicyGuardianSignerContract.policyGuardian()).to.equal("0x0000000000000000000000000000000000000000");
+            }
         } else {
             // Run script: initiate-recovery.js
             await runAndWait(__dirname + "/../src/initiate-recovery.js", [
