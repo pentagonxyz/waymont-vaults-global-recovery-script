@@ -112,7 +112,20 @@ describe("Policy guardian recovery script", function () {
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (SAFE_PROXY_FACTORY_BYTECODE.startsWith("0x") ? SAFE_PROXY_FACTORY_BYTECODE.substring(2) : SAFE_PROXY_FACTORY_BYTECODE) });
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (MULTI_SEND_BYTECODE.startsWith("0x") ? MULTI_SEND_BYTECODE.substring(2) : MULTI_SEND_BYTECODE) });
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.startsWith("0x") ? COMPATIBILITY_FALLBACK_HANDLER_BYTECODE.substring(2) : COMPATIBILITY_FALLBACK_HANDLER_BYTECODE) });
-    
+    });
+
+    let snapshotId;
+
+    beforeEach(async function () {
+        // Restore snapshot ID if exists
+        if (snapshotId !== undefined) await ethers.provider.send("evm_revert", [snapshotId]);
+
+        // Take snapshot
+        snapshotId = await ethers.provider.send("evm_snapshot");
+
+        // Get signers
+        const [relayer] = await ethers.getSigners();
+
         // Deploy WaymontSafeFactory
         await relayer.sendTransaction({ to: SAFE_SINGLETON_FACTORY_ADDRESS, data: "0x0000000000000000000000000000000000000000000000000000000000000000" + (WAYMONT_SAFE_FACTORY_BYTECODE.startsWith("0x") ? WAYMONT_SAFE_FACTORY_BYTECODE.substring(2) : WAYMONT_SAFE_FACTORY_BYTECODE) + ethers.utils.defaultAbiCoder.encode(["address"], [WAYMONT_POLICY_GUARDIAN_MANAGER_ADDRESS]).substring(2) });
     });
