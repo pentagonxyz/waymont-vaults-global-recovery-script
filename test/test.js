@@ -40,9 +40,9 @@ const EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE = "shove modify pet author control topic
 const EXAMPLE_VAULT_SUBKEY_INDEX = 12345678;
 const HD_PATH = "m/44/60/0/0";
 
-function runAndWait(script, args) {
+function runAndWait(script, args, silent) {
     return new Promise((resolve, reject) => {
-        var process = childProcess.fork(script, args);
+        var process = childProcess.fork(script, args, { silent });
         process.on("error", reject);
         process.on("exit", (error) => {
             if (error == 0) resolve();
@@ -325,7 +325,7 @@ async function recoverSafeFromPolicyGuardian(advancedSignerUnderlyingSignerCount
             EXAMPLE_VAULT_SUBKEY_INDEX,
             relayer2._signingKey().privateKey,
             EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
-        ]));
+        ], true));
 
         // Actually initiate recovery permanently
         if (waymontInitiatedRecoveryPermanently) {
@@ -360,7 +360,7 @@ async function recoverSafeFromPolicyGuardian(advancedSignerUnderlyingSignerCount
             EXAMPLE_VAULT_SUBKEY_INDEX,
             relayer2._signingKey().privateKey,
             EXAMPLE_ROOT_MNEMONIC_SEED_PHRASE
-        ]));
+        ], true));
     
         // Wait 60 seconds to get to past the full 14-day timelock (evm_increaseTime) and mine block so latest block timestamp is updated so that recovery execution script recognizes time has passed
         await ethers.provider.send("evm_increaseTime", [60]);
