@@ -9,13 +9,14 @@ Recovery script for use in the event that Waymont's transaction policy guardian 
 First, export your 12-word mnemonic seed phrase (root private key) and your vault subkey indexes from your Waymont mobile signer app:
 
 1. Open the Waymont mobile app on your mobile app.
-2. Hit the user settings button (user icon) in the upper-left corner of the app.
-3. Hit "Export Private Key" (in red text under "Actions") to export your root private key (seed phrase).
-4. Confirm that you are aware of the security implications of exporting your root private key.
-5. Authenticate using biometrics.
-6. Click "Show Key," and the app will display your unencrypted root private key in the form of a 12-word mneumonic seed phrase.
+2. Tap the Waymont bull logo at the top of the screen 3 times.
+3. A "Developer Mode" popup will open asking you to "Enter the password". Type in the password "WaymontVIP".
+4. Hit "Export Private Key" near the bottom of the menu.
+5. Confirm that you are aware of the security implications of exporting your root private key.
+6. Authenticate using biometrics.
+7. The app will display your unencrypted root private key in the form of a 12-word mneumonic seed phrase.
     - **WARNING: Do NOT attempt to transmit this sensitive private key to your computer electronically--simply MANUALLY type it directly into the recovery script (described below) on your computer.**
-7. Take note of your vault subkey indexes as well.
+8. Take note of your vault subkey indexes as well.
     - While they do not need to be private, these are necessary to recover your vaults using this script (as they provide the paths to derive the keys for each vault from your root key).
 
 *As with many other self-custody providers, your 12-word mnemonic seed phrase is the root private key of a HD (hierarchical deterministic) tree of signers for each Waymont vault you own or are a guardian on. However, Waymont does not ask users to manually back it up as it should only be needed in the case of emergency recovery from the policy guardian as described in this document.*
